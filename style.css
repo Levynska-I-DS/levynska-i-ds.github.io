@@ -1,68 +1,253 @@
+/* =====================================================
+   Общие стили для всей страницы
+   ===================================================== */
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background: #f6f6f6;
-    color: #222;
+  margin: 0; /* убираем отступы браузера */
+  padding-top: 80px; /* делаем отступ сверху под фиксированный header */
+  font-family: Arial, sans-serif; /* шрифт для всей страницы */
+  background-color: #cce7ff; /* светлый голубой фон */
+  color: #003366; /* цвет текста */
+  scroll-behavior: smooth; /* плавная прокрутка при переходе по якорям */
 }
 
+/* Ссылки на всей странице */
+a {
+  text-decoration: none; /* убираем подчёркивание */
+  transition: color 0.3s; /* плавное изменение цвета при hover */
+}
+
+/* =====================================================
+   Header / Навигация
+   ===================================================== */
 header {
-    text-align: center;
-    padding: 30px;
-    background: #ffffff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  position: fixed; /* закрепляем шапку сверху */
+  top: 0;
+  width: 100%; /* занимает всю ширину */
+  background-color: #99ccff; /* голубой фон */
+  padding: 15px 20px; /* внутренние отступы */
+  display: flex; /* используем flex для выравнивания элементов */
+  justify-content: space-between; /* логотип слева, меню справа */
+  align-items: center; /* вертикальное выравнивание */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* лёгкая тень */
+  z-index: 1000; /* поверх всего контента */
+  box-sizing: border-box; /* учитываем padding в ширине */
 }
 
-nav a {
-    margin: 0 15px;
-    text-decoration: none;
-    color: #005bbb;
-    font-weight: bold;
+/* Название / логотип в header */
+header h1 {
+  margin: 0;
+  font-size: 24px;
 }
 
-.subtitle {
-    margin-top: -10px;
-    color: #444;
+/* Ссылки навигации */
+header nav a {
+  margin-left: 20px; /* расстояние между ссылками */
+  color: #003366;
+  font-weight: bold;
 }
 
-.intro {
-    max-width: 800px;
-    margin: 40px auto;
-    text-align: center;
+header nav a:hover {
+  color: #ff6600; /* цвет при наведении */
 }
 
-.btn {
-    display: inline-block;
-    padding: 12px 22px;
-    background: #005bbb;
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    margin-top: 20px;
+/* =====================================================
+   Общие стили для всех секций (Projekte, Zertifikate, Kontakt)
+   ===================================================== */
+section {
+  width: 90%; /* занимает 90% ширины экрана */
+  max-width: 900px; /* максимальная ширина на больших экранах */
+  margin: 40px auto; /* отступ сверху/снизу и центрирование */
+  padding: 30px; /* внутренние отступы */
+  background-color: #e6f2ff; /* светло-голубой фон */
+  border-radius: 12px; /* скругление углов */
+  box-sizing: border-box; /* учитываем padding */
 }
 
-.projects {
-    max-width: 900px;
-    margin: 30px auto;
-    padding: 10px;
+/* =====================================================
+   Hero Section / Start Page
+   ===================================================== */
+.hero {
+  height: calc(100vh - 80px); /* занимает весь экран минус header */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* вертикальное центрирование */
+  align-items: center; /* горизонтальное центрирование */
+  text-align: center; /* выравнивание текста по центру */
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.project {
-    background: white;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+/* Круглое фото */
+.profile-photo {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%; /* делает фото круглым */
+  object-fit: cover; /* фото не искажается */
+  display: block;
+  margin-bottom: 15px;
 }
 
-.project a {
-    margin-right: 15px;
-    color: #005bbb;
-    text-decoration: none;
+/* Имя и роль */
+.hero h1 {
+  margin-bottom: 5px;
 }
 
+.hero h2 {
+  margin-top: 0;
+  font-weight: normal;
+}
+
+/* Краткое описание / видение */
+.hero-text {
+  font-size: 18px;
+  margin: 15px 0;
+}
+
+
+/* --- Текст в Hero по левому краю с мягким курсивом и отступом для абзацев --- */
+.left-italic {
+  text-align: justify;       /* ровное распределение текста по ширине */
+  font-style: normal;        /* курсив это italic, а тут его уберем */
+  font-weight: normal;       /* мягкий курсив, не жирный */
+  line-height: 1.6;          /* читаемый межстрочный интервал */
+  max-width: 800px;          /* ограничение ширины для удобного чтения */
+  margin: 20px auto;         /* центрирование блока горизонтально и отступ сверху/снизу */
+}
+
+/* отступ первой строки каждого абзаца внутри блока */
+.left-italic p {
+  text-indent: 1.2em;        /* отступ первой строки */
+  margin-bottom: 0 ;        /* расстояние между абзацами */
+  padding: 0;
+}
+
+/* добавляем небольшое расстояние между абзацами */
+.left-italic p + p {
+  margin-top: 0.5em;        /* только между абзацами */
+}
+
+/* Кнопки в Hero */
+.hero-buttons {
+  margin: 20px 0;
+}
+
+.button {
+  display: inline-block;
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: #003366;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.button:hover {
+  background-color: #ff6600;
+}
+
+.button.secondary {
+  background-color: transparent;
+  color: #003366;
+  border: 2px solid #003366;
+}
+
+/* Социальные ссылки (GitHub, LinkedIn, XING) */
+.social-links {
+  margin-top: 15px;
+}
+
+.social-links a {
+  margin: 0 10px;
+  font-weight: bold;
+  color: #003366;
+}
+
+.social-links a:hover {
+  color: #ff6600;
+}
+
+/* =====================================================
+   Карточки проектов и сертификатов
+   ===================================================== */
+.project-card,
+.certificate-card {
+  background-color: #b3d9ff;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  word-wrap: break-word; /* длинные ссылки и текст не выходят за блок */
+}
+
+/* =====================================================
+   Ссылки контактов (email, GitHub, LinkedIn)
+   ===================================================== */
+.contact-link {
+  margin-right: 15px;
+  font-weight: bold;
+  color: #003366;
+  word-wrap: break-word; /* длинные ссылки не вылезают */
+}
+
+.contact-link:hover {
+  color: #ff6600;
+}
+
+/* =====================================================
+   Footer / подвал
+   ===================================================== */
 footer {
-    text-align: center;
+  text-align: center;
+  padding: 20px;
+  background-color: #99ccff;
+  margin-top: 40px;
+}
+
+/* =====================================================
+   Адаптивность / Мобильные устройства
+   ===================================================== */
+@media (max-width: 768px) {
+  /* Hero на мобильных: подстраиваем высоту */
+  .hero {
+    height: auto;
     padding: 20px;
-    margin-top: 40px;
-    color: #777;
+  }
+
+  /* Кнопки в Hero на всю ширину */
+  .hero-buttons {
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+  }
+
+  .button {
+    width: 90%;
+    text-align: center;
+    margin: 5px 0;
+  }
+
+  /* Социальные ссылки на мобильных */
+  .social-links {
+    flex-wrap: wrap;
+    text-align: center;
+  }
+
+  .social-links a {
+    display: inline-block;
+    margin: 5px 10px;
+  }
+
+  /* Header на мобильных: вертикальное меню */
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  header nav {
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  header nav a {
+    margin: 5px 10px 5px 0;
+  }
 }
