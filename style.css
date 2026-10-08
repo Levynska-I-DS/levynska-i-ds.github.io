@@ -4,8 +4,7 @@
    Redesign 25.09.2026 (v2) — replaces the warm-terracotta
    redesign from earlier the same day, which never actually
    matched what was approved in the mockups. Swap these
-   values to re-theme the whole site (style.css + events/
-   events.css both read from these tokens).
+   values to re-theme the whole site.
    ===================================================== */
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -512,40 +511,6 @@ footer a {
 
 footer a:hover {
   color: var(--color-on-ink);
-}
-
-/* Unobtrusive admin entry point (Event Manager login), placed in the
-   footer next to Datenschutz — same color as the footer, no underline,
-   low opacity, so a regular visitor reads it as a stray dot rather
-   than a link. Iryna knows it's there and can click it. */
-.admin-dot {
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  /* Padding + background-clip keep the VISIBLE dot the same tiny size
-     (so it still just reads as a stray dot) while giving it a much
-     bigger invisible tap target -- fixed 28.09.2026 after the dot next
-     to "Datenschutz" was too easy to hit by accident on a phone. */
-  padding: 11px;
-  background-clip: content-box;
-  margin-left: 18px;
-  border-radius: 50%;
-  background-color: currentColor;
-  opacity: 0.35;
-  vertical-align: middle;
-}
-
-.admin-dot:hover {
-  opacity: 0.8;
-}
-
-/* The dot used to sit right next to "Datenschutz" on the same line --
-   Iryna reported it was still too easy to hit by accident on a phone even
-   after the bigger invisible tap target. Moved 28.09.2026: now on its own
-   row below the footer text, with real vertical distance from any other
-   link, so a thumb aiming for "Datenschutz" is nowhere near it. */
-.admin-dot-row {
-  margin-top: 14px;
 }
 
 /* =====================================================
