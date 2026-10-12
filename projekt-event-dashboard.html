@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event-Dashboard Familienclub – Iryna Levynska</title>
+  <meta name="description" content="Interaktive Web-Nachbildung eines Power-BI-Berichts: Anmeldungen, Kosten und Werbewirkung von sieben Vereinsfesten.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root { --c1:#2b6cb0; --c2:#d9822b; --c3:#a23b5a; --dim:#c9ced6; --card:#fffdf9; --frame:#f1e8da; }
+    .lead { font-size:1.02rem; line-height:1.7; color:var(--color-text-muted); max-width:680px; margin:0 0 22px; }
+    .actions { display:flex; flex-wrap:wrap; gap:14px; }
+    .wide { max-width:1200px; }
+    .report { background:var(--frame); border:1px solid var(--color-border); border-radius:10px; padding:14px; }
+    .bar { display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .tabs { display:flex; flex-wrap:wrap; gap:6px; }
+    .tab { font:600 .82rem var(--font-main); padding:8px 14px; border-radius:6px; border:1px solid var(--color-border); background:var(--card); color:var(--color-text-muted); cursor:pointer; }
+    .tab[aria-selected="true"] { background:var(--color-ink); color:var(--color-on-ink); border-color:var(--color-ink); }
+    .slicer { display:flex; align-items:center; gap:8px; font-size:.82rem; color:var(--color-text-muted); font-weight:600; }
+    .slicer select { font:500 .88rem var(--font-main); padding:7px 10px; border:1px solid var(--color-border); border-radius:6px; background:var(--card); color:var(--color-text); max-width:240px; }
+    .reset { font:600 .78rem var(--font-main); background:none; border:none; color:var(--color-accent); cursor:pointer; padding:4px; visibility:hidden; }
+    .body { display:grid; grid-template-columns:240px 1fr; gap:12px; align-items:start; }
+    .aside { background:var(--card); border:1px solid #eadfcd; border-radius:8px; padding:14px; position:sticky; top:76px; }
+    .aside .et { font-family:var(--font-display); font-size:1.15rem; font-weight:600; line-height:1.25; margin:0 0 2px; }
+    .aside .ed { font-size:.8rem; color:var(--color-text-muted); margin:0 0 12px; }
+    .poster { width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:6px; display:block; background:var(--frame); }
+    .ph { width:100%; aspect-ratio:3/4; border-radius:6px; background:linear-gradient(160deg,#1f3a52,#2b6cb0); color:#f5f1e9; display:flex; flex-direction:column; justify-content:flex-end; padding:12px; box-sizing:border-box; font-weight:700; font-size:.85rem; line-height:1.3; }
+    .ph span { font-weight:500; font-size:.72rem; opacity:.8; margin-top:4px; }
+    .brand { display:flex; align-items:center; gap:10px; margin:0 0 12px; padding-bottom:12px; border-bottom:1px solid #eadfcd; font-size:.78rem; font-weight:700; color:var(--color-text-muted); }
+    .brand img { width:46px; height:46px; object-fit:contain; }
+    .thumbs { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .thumbs button { padding:0; border:none; background:none; cursor:pointer; border-radius:6px; overflow:hidden; text-align:left; }
+    .thumbs button:hover { outline:2px solid var(--c1); }
+    .thumbs .ph { font-size:.68rem; padding:8px; } .thumbs .ph span { font-size:.62rem; }
+    .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:12px; }
+    .card { background:var(--card); border-radius:8px; padding:14px 16px; border:1px solid #eadfcd; min-width:0; }
+    .kpis { grid-column:1/-1; display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
+    .kpi .v { font-family:var(--font-display); font-size:1.9rem; font-weight:600; line-height:1.1; }
+    .kpi .l { font-size:.8rem; color:var(--color-text-muted); margin-top:4px; }
+    .card h3 { font-family:var(--font-main); font-size:.92rem; font-weight:700; margin:0 0 2px; }
+    .card .sub { font-size:.78rem; color:var(--color-text-muted); margin:0 0 8px; }
+    .s8 { grid-column:span 8; } .s4 { grid-column:span 4; } .s6 { grid-column:span 6; } .s12 { grid-column:1/-1; }
+    .legend { display:flex; flex-wrap:wrap; gap:4px 14px; font-size:.76rem; color:var(--color-text-muted); margin:0 0 6px; }
+    .legend i { display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:5px; }
+    .chart svg { display:block; width:100%; overflow:visible; }
+    .chart text { font-family:var(--font-main); font-size:11px; fill:#6b5d4c; }
+    .chart .val { fill:#2a2420; font-weight:700; }
+    .hit { cursor:pointer; }
+    .hint { font-size:.76rem; color:var(--color-text-muted); margin-top:10px; }
+    #tip { position:fixed; pointer-events:none; background:#16283a; color:#f5f1e9; font-size:.78rem; line-height:1.45; padding:7px 10px; border-radius:6px; opacity:0; transition:opacity .1s; z-index:2000; max-width:240px; }
+    .insights { margin:0; padding:0; list-style:none; counter-reset:i; }
+    .insights li { position:relative; padding:0 0 18px 40px; line-height:1.65; }
+    .insights li::before { counter-increment:i; content:counter(i); position:absolute; left:0; top:0; width:26px; height:26px; border-radius:50%; background:var(--color-accent-soft); color:var(--color-accent); font-weight:700; font-size:.85rem; display:flex; align-items:center; justify-content:center; }
+    .facts { margin:0; font-size:.93rem; line-height:1.7; }
+    .facts dt { font-weight:700; margin-top:10px; } .facts dd { margin:0; color:var(--color-text-muted); }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
+    .back { display:inline-block; margin-bottom:18px; font-size:.85rem; font-weight:600; color:var(--color-accent); }
+    @media (max-width:860px) { .body { grid-template-columns:1fr; } .aside { position:static; } .aside .poster, .aside .ph.big { max-width:220px; } .thumbs { grid-template-columns:repeat(4,1fr); } .s8,.s4,.s6 { grid-column:1/-1; } .two-col { grid-template-columns:1fr; gap:24px; } }
+    @media (max-width:600px) { .slicer { width:100%; flex-wrap:wrap; } .slicer select { flex:1 1 60%; min-width:0; max-width:none; } .reset { flex-basis:100%; text-align:left; } }
+    @media (max-width:480px) { .report { padding:10px; } .kpi .v { font-size:1.5rem; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Iryna Levynska</h1>
+  <nav>
+    <a href="index.html">Start</a>
+    <a href="portfolio.html">Projekte</a>
+    <a href="achievements.html">Zertifikate</a>
+    <a href="contact.html">Kontakt</a>
+  </nav>
+</header>
+
+<section>
+  <a href="portfolio.html" class="back">← Alle Projekte</a>
+  <span class="eyebrow-label">Power BI · SQL Server · DAX</span>
+  <h2>Event-Dashboard für einen Familienverein</h2>
+  <p class="lead">Ein Familienclub plant monatliche Feste. Das Dashboard zeigt dem Organisationsteam auf einen Blick, wie sich die Anmeldungen entwickeln, welche Werbung wirkt und ob das Budget reicht. Unten können Sie es ausprobieren: Seite wechseln, Veranstaltung wählen oder auf einen Balken klicken.</p>
+  <div class="actions">
+    <a href="https://github.com/Levynska-I-DS/Portfolio/tree/main/Project_02" target="_blank" rel="noopener" class="button">Details auf GitHub</a>
+    <a href="https://github.com/Levynska-I-DS/Portfolio/blob/main/Project_02/video.mp4" target="_blank" rel="noopener" class="button secondary">Video des Originals</a>
+  </div>
+</section>
+
+<section class="wide">
+  <div class="report">
+    <div class="bar">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-p="1">Übersicht</button>
+        <button class="tab" role="tab" data-p="2">Veranstaltungen &amp; Kosten</button>
+        <button class="tab" role="tab" data-p="3">Werbung</button>
+      </div>
+      <div class="slicer"><label for="ev">Veranstaltung</label><select id="ev"></select><button class="reset" id="reset">Auswahl aufheben</button></div>
+    </div>
+    <div class="body"><aside class="aside" id="aside"></aside><div class="grid" id="page"></div></div>
+  </div>
+  <p class="hint">Interaktive Web-Nachbildung des Power-BI-Berichts mit den Daten der anonymisierten Demo-Datenbank. Die Original-Datei (.pbix) mit Datenmodell und DAX-Measures liegt auf GitHub.</p>
+</section>
+
+<section>
+  <span class="eyebrow-label">Erkenntnisse</span>
+  <ol class="insights">
+    <li><strong>Die Erinnerung wirkt.</strong> Bei drei der letzten vier Feste kam fast die Hälfte der Anmeldungen (45&nbsp;%, 55&nbsp;%, 45&nbsp;%) erst nach der WhatsApp-Erinnerung. Eine Erinnerung wenige Tage vor Anmeldeschluss sollte fester Bestandteil jeder Planung sein.</li>
+    <li><strong>Spätanmeldungen einplanen.</strong> Insgesamt 13&nbsp;% melden sich nach Anmeldeschluss an, beim Kürbis-Festival sogar 21&nbsp;%. Ein kleiner Puffer bei Essen und Plätzen ist realistisch.</li>
+    <li><strong>Stammpublikum.</strong> Nach dem ersten Fest kommen nur noch 23&nbsp;% der Anmeldungen von neuen Familien – der Verein bindet seine Familien, gewinnt aber wenige neue.</li>
+    <li><strong>Budget mit Spielraum.</strong> Genutzt wurden 34&nbsp;% des Budgets, rund 2,83&nbsp;€ pro angemeldeter Person. Größter Posten sind die Helfer-Honorare (47&nbsp;%).</li>
+  </ol>
+</section>
+
+<section>
+  <div class="two-col">
+    <div>
+      <span class="eyebrow-label">Umsetzung</span>
+      <dl class="facts">
+        <dt>Datenbasis</dt><dd>SQL-Server-Datenbank mit Stern-Schema: Fakten (Anmeldungen, Werbung, Ausgaben, Helfer) und Dimensionen (Veranstaltung, Datum, Personen, Kanäle).</dd>
+        <dt>Power BI &amp; DAX</dt><dd>Measures für neue Personen und Budgetausschöpfung, eine berechnete Spalte ordnet jede Anmeldung einer Werbephase zu, eine berechnete Tabelle führt Belege und Helfer-Honorare zusammen.</dd>
+        <dt>Mein Anteil</dt><dd>Anforderungen, Datenmodell, SQL, Measures, Dashboard-Design und Interpretation.</dd>
+      </dl>
+    </div>
+    <div>
+      <span class="eyebrow-label">Daten &amp; Annahmen</span>
+      <dl class="facts">
+        <dt>Anonymisiert</dt><dd>Basierend auf einem echten Vereinsprojekt. Alle Namen und Kontaktdaten sind erfunden, Geburtsdaten verschoben, gezeigt werden nur Summen.</dd>
+        <dt>Anmeldung ≠ Teilnahme</dt><dd>Die Zahlen zeigen die Teilnahmeabsicht, nicht die tatsächliche Anwesenheit.</dd>
+        <dt>Kosten</dt><dd>Helfer-Honorare werden den Veranstaltungskosten zugerechnet.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2026 Iryna Levynska · <a href="portfolio-datenschutz.html">Datenschutz</a>
+</footer>
+
+<div id="tip" role="tooltip"></div>
+
+<script>
+const EV = [{"id":1,"t":"Family Summer Fun Day","d":"2025-06-28","dl":"2025-06-25","b":500.0,"an":19,"p":65,"er":32,"ki":33,"neu":65,"frei":62,"age":[14,12,7],"ph":[44,13,8],"cat":{"Lebensmittel":95.05,"Helfer-Honorare":30.0},"daily":[[-25,2],[-19,3],[-17,4],[-15,6],[-13,2],[-10,2],[-2,5],[-1,20],[0,13],[1,1],[2,7]],"ads":[[-31,1],[-15,2],[-1,3]]},{"id":2,"t":"Sommerfest Abschluss Party","d":"2025-07-26","dl":"2025-07-23","b":500.0,"an":22,"p":69,"er":31,"ki":38,"neu":23,"frei":58,"age":[16,16,6],"ph":[59,6,4],"cat":{"Kinderprogramm":30.0,"Lebensmittel":80.27,"Helfer-Honorare":70.0},"daily":[[-7,11],[-5,2],[-4,4],[-3,7],[-2,17],[-1,18],[0,6],[3,4]],"ads":[[-7,2],[-1,3]]},{"id":3,"t":"Sportfest","d":"2025-09-27","dl":"2025-09-24","b":500.0,"an":14,"p":52,"er":24,"ki":28,"neu":19,"frei":45,"age":[8,8,5],"ph":[44,0,8],"cat":{"Kinderprogramm":30.0,"Lebensmittel":74.47,"Helfer-Honorare":90.0},"daily":[[-8,3],[-5,3],[-3,2],[-2,11],[-1,4],[0,21],[1,3],[2,5]],"ads":[[1,1],[-8,2]]},{"id":4,"t":"Kürbis-Festival","d":"2025-10-25","dl":"2025-10-22","b":500.0,"an":17,"p":71,"er":32,"ki":39,"neu":20,"frei":61,"age":[18,12,9],"ph":[24,32,15],"cat":{"Kinderprogramm":24.0,"Helfer-Honorare":90.0},"daily":[[-5,5],[-3,4],[-2,15],[0,32],[1,7],[2,8]],"ads":[[-27,1],[-5,2],[-2,3]]},{"id":5,"t":"Schlittschuhlaufen im Park","d":"2025-11-22","dl":"2025-11-19","b":500.0,"an":13,"p":54,"er":27,"ki":27,"neu":3,"frei":51,"age":[10,11,6],"ph":[38,16,0],"cat":{"Lebensmittel":34.32,"Veranstaltungsmaterial":64.46,"Helfer-Honorare":90.0},"daily":[[-6,4],[-3,3],[-1,31],[0,16]],"ads":[[-55,1],[-6,2],[-1,3]]},{"id":6,"t":"Winterfest für Kinder","d":"2025-12-20","dl":"2025-12-17","b":500.0,"an":15,"p":49,"er":23,"ki":26,"neu":10,"frei":37,"age":[11,12,4],"ph":[15,27,7],"cat":{"Kinderprogramm":48.0,"Lebensmittel":41.9,"Helfer-Honorare":90.0},"daily":[[-15,5],[-13,3],[-12,1],[-2,6],[-1,25],[0,2],[1,5],[6,2]],"ads":[[-22,1],[-15,2],[-2,3]]},{"id":7,"t":"Familien-Basteltag","d":"2026-01-31","dl":"2026-01-28","b":500.0,"an":18,"p":55,"er":27,"ki":28,"neu":5,"frei":50,"age":[8,18,7],"ph":[20,25,10],"cat":{"Kinderprogramm":22.0,"Lebensmittel":72.46,"Veranstaltungsmaterial":8.99,"Helfer-Honorare":90.0},"daily":[[-6,2],[-5,7],[-1,11],[0,25],[1,8],[2,2]],"ads":[[-6,2],[-1,3]]}];
+const C = { c1:'#2b6cb0', c2:'#d9822b', c3:'#a23b5a', dim:'#c9ced6', age:['#9cc3ef','#4f92e0','#1d5fae'], grid:'#e9dfcf' };
+const MON = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+const fmt = (x,n=0) => x.toLocaleString('de-DE',{minimumFractionDigits:n,maximumFractionDigits:n});
+const eur = x => fmt(x,0)+' €';
+const pc = (a,b) => b ? fmt(100*a/b,0)+' %' : '–';
+const dshort = s => { const [y,m,d]=s.split('-'); return +d+'. '+MON[m-1]; };
+const short = (t,n=14) => t.length>n ? t.slice(0,n-1)+'…' : t;
+let state = { p:1, ev:null };
+try { const s = JSON.parse(sessionStorage.getItem('evdash')||'{}'); if (s.p) state.p=s.p; } catch(e) {}
+
+const sel = () => state.ev ? EV.filter(e=>e.id===state.ev) : EV;
+const sum = (arr,f) => arr.reduce((a,e)=>a+f(e),0);
+const spent = e => Object.values(e.cat).reduce((a,b)=>a+b,0);
+
+// ---------- tooltip ----------
+const tip = document.getElementById('tip');
+function tipOn(ev, html){ tip.innerHTML=html; tip.style.opacity=1; tipMove(ev); }
+function tipMove(ev){ const x=Math.min(ev.clientX+14, window.innerWidth-tip.offsetWidth-8); tip.style.left=x+'px'; tip.style.top=(ev.clientY+14)+'px'; }
+function tipOff(){ tip.style.opacity=0; }
+function bindTips(root){ root.querySelectorAll('[data-tip]').forEach(n=>{ n.addEventListener('mouseenter',e=>tipOn(e,n.dataset.tip)); n.addEventListener('mousemove',tipMove); n.addEventListener('mouseleave',tipOff); }); }
+
+// ---------- svg helpers ----------
+const NS='http://www.w3.org/2000/svg';
+function svg(w,h){ const s=document.createElementNS(NS,'svg'); s.setAttribute('viewBox',`0 0 ${w} ${h}`); s.setAttribute('height',h); return s; }
+function el(p,tag,a,txt){ const n=document.createElementNS(NS,tag); for(const k in a) n.setAttribute(k,a[k]); if(txt!==undefined) n.textContent=txt; p.appendChild(n); return n; }
+function rbar(p,x,y,w,h,fill,r){ // rect with rounded top only
+  r=Math.min(r||3,w/2,h); if(h<=0) return;
+  el(p,'path',{d:`M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`,fill});
+}
+const niceMax = v => { const p=Math.pow(10,Math.floor(Math.log10(v||1))); const f=v/p; return (f<=1?1:f<=2?2:f<=5?5:10)*p; };
+const steps = m => { const f=m/Math.pow(10,Math.floor(Math.log10(m))); return f===2?4:5; };
+
+// Column chart over events. series: [{key,color,label,val(e)}], stacked
+function eventColumns(box, series, opts={}){
+  const W=box.clientWidth, H=opts.h||220, L=34, B=34, T=18;
+  const s=svg(W,H); const max=niceMax(Math.max(opts.ref||0, ...EV.map(e=>sum(series,x=>x.val(e)))))*1.0;
+  const y=v=>T+(H-T-B)*(1-v/max); const bw=(W-L)/EV.length; const cw=Math.min(46,bw*0.62);
+  const st=steps(max); for(let i=0;i<=st;i++){ const v=max*i/st; el(s,'line',{x1:L,x2:W,y1:y(v),y2:y(v),stroke:C.grid,'stroke-width':1}); el(s,'text',{x:L-6,y:y(v)+4,'text-anchor':'end'},fmt(v)); }
+  EV.forEach((e,i)=>{
+    const g=el(s,'g',{class:'hit',opacity: state.ev && state.ev!==e.id ? .3 : 1}); const cx=L+bw*i+bw/2;
+    let acc=0; series.forEach((sr,k)=>{ const v=sr.val(e); if(v<=0) return; const y0=y(acc), y1=y(acc+v); const top=k===series.length-1||series.slice(k+1).every(q=>q.val(e)<=0);
+      if(top) rbar(g,cx-cw/2,y1,cw,y0-y1-(acc?2:0),sr.color,4); else el(g,'rect',{x:cx-cw/2,y:y1,width:cw,height:Math.max(0,y0-y1-(acc?2:0)),fill:sr.color}); acc+=v; });
+    el(g,'text',{x:cx,y:y(acc)-5,'text-anchor':'middle',class:'val'}, opts.lab?opts.lab(acc):fmt(acc));
+    el(g,'text',{x:cx,y:H-B+15,'text-anchor':'middle'}, bw<60 ? MON[+e.d.slice(5,7)-1] : dshort(e.d));
+    const hit=el(g,'rect',{x:L+bw*i,y:T,width:bw,height:H-T-B+20,fill:'transparent'});
+    hit.dataset.tip=`<b>${e.t}</b><br>`+series.map(sr=>`${sr.label}: ${opts.lab?opts.lab(sr.val(e)):fmt(sr.val(e))}`).join('<br>');
+    hit.addEventListener('click',()=>setEv(state.ev===e.id?null:e.id));
+  });
+  if(opts.ref){ el(s,'line',{x1:L,x2:W,y1:y(opts.ref),y2:y(opts.ref),stroke:'#2a2420','stroke-width':1.5,'stroke-dasharray':'5 4'}); el(s,'text',{x:W,y:y(opts.ref)-6,'text-anchor':'end',class:'val'},opts.refLabel); }
+  box.appendChild(s); bindTips(box);
+}
+
+// Horizontal bars: rows [{label,value,color,tip}]
+function hbars(box, rows, opts={}){
+  const W=box.clientWidth, rh=34, H=rows.length*rh+4, LW=opts.lw||110; const s=svg(W,H);
+  const max=Math.max(...rows.map(r=>r.value),1);
+  rows.forEach((r,i)=>{ const y=i*rh+6; const w=(W-LW-56)*r.value/max;
+    el(s,'text',{x:0,y:y+14},r.label);
+    const g=el(s,'g',{}); if(w>0){ el(g,'rect',{x:LW,y:y+2,width:w,height:16,rx:3,fill:r.color}); }
+    el(s,'text',{x:LW+w+6,y:y+14,class:'val'}, r.text);
+    const hit=el(s,'rect',{x:0,y:y-2,width:W,height:rh-4,fill:'transparent'}); hit.dataset.tip=r.tip; });
+  box.appendChild(s); bindTips(box);
+}
+
+// 100% stacked rows per event
+function phaseRows(box){
+  const W=box.clientWidth, rh=30, LW=Math.min(190,W*0.34), H=EV.length*rh+2; const s=svg(W,H); const cols=[C.c1,C.c2,C.c3]; const names=['Nach erster Ankündigung','Nach Erinnerung','Nach Anmeldeschluss'];
+  EV.forEach((e,i)=>{ const y=i*rh+4; const g=el(s,'g',{class:'hit',opacity: state.ev && state.ev!==e.id ? .3 : 1});
+    el(g,'text',{x:0,y:y+13},short(e.t, W>700?30:14)); let x=LW; const tot=e.p, bw=W-LW;
+    e.ph.forEach((v,k)=>{ if(!v) return; const w=bw*v/tot; el(g,'rect',{x:x,y:y,width:Math.max(0,w-2),height:18,fill:cols[k]}); if(w>34) el(g,'text',{x:x+w/2-1,y:y+13,'text-anchor':'middle',style:'fill:#fff;font-weight:700'},pc(v,tot)); x+=w; });
+    const hit=el(g,'rect',{x:0,y:y-4,width:W,height:rh-2,fill:'transparent'});
+    hit.dataset.tip=`<b>${e.t}</b><br>`+e.ph.map((v,k)=>`${names[k]}: ${v} (${pc(v,tot)})`).join('<br>');
+    hit.addEventListener('click',()=>setEv(state.ev===e.id?null:e.id)); });
+  box.appendChild(s); bindTips(box);
+}
+
+// Timeline relative to Anmeldeschluss
+function timeline(box){
+  const evs=sel(); const W=box.clientWidth, H=220, L=30, B=34, T=26; const s=svg(W,H);
+  const days={}; evs.forEach(e=>e.daily.forEach(([d,p])=>days[d]=(days[d]||0)+p));
+  const ads = state.ev ? evs[0].ads : [];
+  const ks=Object.keys(days).map(Number); let lo=Math.min(-21,...ks,...ads.map(a=>a[0]).filter(d=>d>=-35)), hi=Math.max(3,...ks);
+  const n=hi-lo+1, bw=(W-L)/n, max=niceMax(Math.max(...Object.values(days))); const y=v=>T+(H-T-B)*(1-v/max); const xc=d=>L+bw*(d-lo)+bw/2;
+  const st=steps(max); for(let i=0;i<=st;i++){ const v=max*i/st; el(s,'line',{x1:L,x2:W,y1:y(v),y2:y(v),stroke:C.grid}); el(s,'text',{x:L-6,y:y(v)+4,'text-anchor':'end'},fmt(v)); }
+  // Phasen-Hintergrund nach Anmeldeschluss
+  el(s,'rect',{x:xc(0)+bw/2,y:T,width:W-(xc(0)+bw/2),height:H-T-B,fill:'#a23b5a',opacity:.07});
+  for(let d=lo; d<=hi; d++){ const v=days[d]||0; const col = d>0?C.c3:C.c1;
+    if(v) rbar(s,xc(d)-Math.max(2,bw*0.36),y(v),Math.max(4,bw*0.72),y(0)-y(v),col,2);
+    if(d%7===0 || d===hi && false) el(s,'text',{x:xc(d),y:H-B+15,'text-anchor':'middle'}, d===0?'Schluss':(d>0?'+':'')+d);
+    const hit=el(s,'rect',{x:xc(d)-bw/2,y:T,width:bw,height:H-T-B,fill:'transparent'}); hit.dataset.tip=`${d===0?'Tag des Anmeldeschlusses':(d<0?(-d)+' Tage vor':d+' Tage nach')+' Anmeldeschluss'}<br><b>${v} Personen</b>`; }
+  el(s,'line',{x1:xc(0)+bw/2,x2:xc(0)+bw/2,y1:T-6,y2:H-B,stroke:'#a23b5a','stroke-width':1.5});
+  const names={1:'Zeitschrift',2:'WhatsApp-Ankündigung',3:'WhatsApp-Erinnerung'}, cols={1:C.c1,2:C.c1,3:C.c2};
+  ads.filter(a=>a[0]>=lo).forEach(([d,k],i)=>{ const x=xc(d)-bw/2; el(s,'line',{x1:x,x2:x,y1:T-6,y2:H-B,stroke:cols[k],'stroke-width':2,'stroke-dasharray':'4 3'});
+    const right=x>W*0.6; el(s,'text',{x:right?x-4:x+4,y:T-8+(i%2)*11,'text-anchor':right?'end':'start',style:`fill:${cols[k]};font-weight:700`},names[k]); });
+  box.appendChild(s); bindTips(box);
+}
+
+// ---------- pages ----------
+function kpiCards(items){ return `<div class="kpis">${items.map(([v,l])=>`<div class="card kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('')}</div>`; }
+function card(cls,title,sub,legend,id){ return `<div class="card chart ${cls}"><h3>${title}</h3><p class="sub">${sub}</p>${legend?`<div class="legend">${legend}</div>`:''}<div id="${id}"></div></div>`; }
+const lg = arr => arr.map(([c,t])=>`<span><i style="background:${c}"></i>${t}</span>`).join('');
+
+function render(){
+  const page=document.getElementById('page'); const evs=sel();
+  const P=sum(evs,e=>e.p), ER=sum(evs,e=>e.er), KI=sum(evs,e=>e.ki), NEU=sum(evs,e=>e.neu), AN=sum(evs,e=>e.an);
+  const BUD=sum(evs,e=>e.b), SP=sum(evs,spent);
+  const scope = state.ev ? evs[0].t : 'alle Veranstaltungen';
+  if(state.p===1){
+    page.innerHTML = kpiCards([[evs.length,'Veranstaltungen'],[fmt(P),'Angemeldete Personen'],[fmt(ER),'Angemeldete Erwachsene'],[fmt(KI),'Angemeldete Kinder'],[pc(NEU,P),'Anteil Erstanmeldungen']])
+      + card('s8','Angemeldete Personen je Veranstaltung','Klicken Sie auf eine Säule, um alle Seiten zu filtern',lg([[C.c1,'Erwachsene'],[C.c2,'Kinder']]),'c1')
+      + card('s4','Kinder nach Altersgruppe',scope,'','c2')
+      + card('s12','Eintritt',scope,'','c3');
+    eventColumns($('c1'),[{color:C.c1,label:'Erwachsene',val:e=>e.er},{color:C.c2,label:'Kinder',val:e=>e.ki}]);
+    const ag=[0,1,2].map(k=>sum(evs,e=>e.age[k])); const at=ag[0]+ag[1]+ag[2];
+    hbars($('c2'),['Bis 6 Jahre','6–12 Jahre','Über 12 Jahre'].map((l,k)=>({label:l,value:ag[k],color:C.age[k],text:`${ag[k]} · ${pc(ag[k],at)}`,tip:`${l}: ${ag[k]} Kinder`})),{lw:92});
+    const fr=sum(evs,e=>e.frei);
+    hbars($('c3'),[{label:'Kostenlos',value:fr,color:C.c1,text:`${fmt(fr)} · ${pc(fr,P)}`,tip:`Kostenloser Eintritt (Mitglieder): ${fr} Personen`},{label:'Kostenpflichtig',value:P-fr,color:C.dim,text:`${fmt(P-fr)} · ${pc(P-fr,P)}`,tip:`Kostenpflichtig: ${P-fr} Personen`}],{lw:110});
+  }
+  if(state.p===2){
+    page.innerHTML = kpiCards([[eur(BUD),'Budget'],[eur(SP),'Tatsächliche Ausgaben'],[eur(BUD-SP),'Restbudget'],[pc(SP,BUD),'Budget verbraucht']])
+      + card('s8','Ausgaben je Veranstaltung','Gestrichelte Linie = Budget je Fest',lg([[C.c1,'Sachausgaben'],[C.c2,'Helfer-Honorare']]),'c1')
+      + card('s4','Ausgaben nach Kategorie',scope,'','c2')
+      + card('s12','Neue und wiederkehrende Personen','Erstanmeldung = erste Veranstaltung der Familie',lg([[C.c1,'Wiederkehrend'],[C.c2,'Neu']]),'c3');
+    eventColumns($('c1'),[{color:C.c1,label:'Sachausgaben',val:e=>spent(e)-(e.cat['Helfer-Honorare']||0)},{color:C.c2,label:'Helfer-Honorare',val:e=>e.cat['Helfer-Honorare']||0}],{ref:EV[0].b,refLabel:'Budget '+eur(EV[0].b),lab:eur,h:240});
+    const cats={}; evs.forEach(e=>Object.entries(e.cat).forEach(([k,v])=>cats[k]=(cats[k]||0)+v));
+    const rows=Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({label:k.replace('Veranstaltungsmaterial','Material'),value:v,color:k==='Helfer-Honorare'?C.c2:C.c1,text:`${eur(v)} · ${pc(v,SP)}`,tip:`${k}: ${fmt(v,2)} €`}));
+    hbars($('c2'),rows,{lw:118});
+    eventColumns($('c3'),[{color:C.c1,label:'Wiederkehrend',val:e=>e.p-e.neu},{color:C.c2,label:'Neu',val:e=>e.neu}],{h:200});
+  }
+  if(state.p===3){
+    const ph=[0,1,2].map(k=>sum(evs,e=>e.ph[k]));
+    page.innerHTML = kpiCards([[fmt(P),'Angemeldete Personen'],[pc(ph[0],P),'Anteil nach erster Ankündigung'],[pc(ph[1],P),'Anteil nach Erinnerung'],[pc(ph[2],P),'Anteil nach Anmeldeschluss']])
+      + card('s12','Anmeldungen rund um den Anmeldeschluss', state.ev ? 'Personen pro Tag, mit Werbemaßnahmen dieser Veranstaltung' : 'Personen pro Tag, alle Feste übereinander gelegt – wählen Sie ein Fest, um die Werbung zu sehen', lg([[C.c1,'Rechtzeitig'],[C.c3,'Nach Anmeldeschluss']]),'c1')
+      + card('s12','Wann melden sich Familien an?','Anteil je Werbephase – Klick filtert',lg([[C.c1,'Nach erster Ankündigung'],[C.c2,'Nach Erinnerung'],[C.c3,'Nach Anmeldeschluss']]),'c2');
+    timeline($('c1')); phaseRows($('c2'));
+  }
+  renderAside();
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected', +t.dataset.p===state.p));
+  document.getElementById('ev').value = state.ev||'';
+  document.getElementById('reset').style.visibility = state.ev ? 'visible' : 'hidden';
+}
+const $=id=>document.getElementById(id);
+function posterHTML(e, big){
+  const ph = `<div class="ph${big?' big':''}">${e.t}<span>${dlong(e.d)}</span></div>`;
+  return `<img class="poster" src="assets/img/events/${e.id}.jpg" alt="Ankündigung: ${e.t}" loading="lazy" onerror="this.outerHTML=this.dataset.ph" data-ph='${ph.replace(/'/g,"&#39;")}'>`;
+}
+const dlong = s => { const [y,m,d]=s.split('-'); return +d+'. '+['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'][m-1]+' '+y; };
+function renderAside(){
+  const a=$('aside'); const brand='<div class="brand"><img src="assets/img/events/logo.jpg" alt="">Familienclub Sonnenschein</div>';
+  if(state.ev){ const e=EV.find(x=>x.id===state.ev);
+    a.innerHTML=brand+`<p class="et">${e.t}</p><p class="ed">${dlong(e.d)} · Anmeldeschluss ${dshort(e.dl)}</p>${posterHTML(e,true)}`;
+  } else {
+    a.innerHTML=brand+`<p class="et">Alle Veranstaltungen</p><p class="ed">Juni 2025 – Januar 2026 · Ankündigung anklicken</p><div class="thumbs">${EV.map(e=>`<button data-id="${e.id}" title="${e.t}">${posterHTML(e,false)}</button>`).join('')}</div>`;
+    a.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>setEv(+b.dataset.id)));
+  }
+}
+function setEv(id){ state.ev=id; render(); }
+const evSel=document.getElementById('ev');
+evSel.innerHTML='<option value="">Alle Veranstaltungen</option>'+EV.map(e=>`<option value="${e.id}">${e.t} (${dshort(e.d)})</option>`).join('');
+evSel.addEventListener('change',()=>setEv(evSel.value?+evSel.value:null));
+document.getElementById('reset').addEventListener('click',()=>setEv(null));
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{ state.p=+t.dataset.p; try{sessionStorage.setItem('evdash',JSON.stringify({p:state.p}))}catch(e){} render(); }));
+let rt; window.addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(render,120); });
+render();
+</script>
+</body>
+</html>
