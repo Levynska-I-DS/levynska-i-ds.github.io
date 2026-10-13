@@ -39,6 +39,7 @@
     .kpi .l { font-size:.8rem; color:var(--color-text-muted); margin-top:4px; }
     .card h3 { font-family:var(--font-main); font-size:.92rem; font-weight:700; margin:0 0 2px; }
     .card .sub { font-size:.78rem; color:var(--color-text-muted); margin:0 0 8px; }
+    .r2 { grid-row:span 2; }
     .s8 { grid-column:span 8; } .s4 { grid-column:span 4; } .s6 { grid-column:span 6; } .s12 { grid-column:1/-1; }
     .legend { display:flex; flex-wrap:wrap; gap:4px 14px; font-size:.76rem; color:var(--color-text-muted); margin:0 0 6px; }
     .legend i { display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:5px; }
@@ -55,7 +56,7 @@
     .facts dt { font-weight:700; margin-top:10px; } .facts dd { margin:0; color:var(--color-text-muted); }
     .two-col { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
     .back { display:inline-block; margin-bottom:18px; font-size:.85rem; font-weight:600; color:var(--color-accent); }
-    @media (max-width:860px) { .body { grid-template-columns:1fr; } .aside { position:static; } .aside .poster, .aside .ph.big { max-width:220px; } .thumbs { grid-template-columns:repeat(4,1fr); } .s8,.s4,.s6 { grid-column:1/-1; } .two-col { grid-template-columns:1fr; gap:24px; } }
+    @media (max-width:860px) { .r2 { grid-row:auto; } .body { grid-template-columns:1fr; } .aside { position:static; } .aside .poster, .aside .ph.big { max-width:220px; } .thumbs { grid-template-columns:repeat(4,1fr); } .s8,.s4,.s6 { grid-column:1/-1; } .two-col { grid-template-columns:1fr; gap:24px; } }
     @media (max-width:600px) { .slicer { width:100%; flex-wrap:wrap; } .slicer select { flex:1 1 60%; min-width:0; max-width:none; } .reset { flex-basis:100%; text-align:left; } }
     @media (max-width:480px) { .report { padding:10px; } .kpi .v { font-size:1.5rem; } }
   </style>
@@ -201,6 +202,26 @@ function hbars(box, rows, opts={}){
   box.appendChild(s); bindTips(box);
 }
 
+
+// Ringdiagramm: gleicher Durchmesser und gleiche Ringdicke überall
+function donut(box, rows, centerLabel){
+  const W=box.clientWidth, R=70, r=46, H=2*R+12; const s=svg(W,H); const cx=R+4, cy=H/2;
+  const tot=rows.reduce((a,x)=>a+x.value,0)||1; let a0=-Math.PI/2;
+  rows.forEach(x=>{ if(x.value<=0) return; const a1=a0+2*Math.PI*x.value/tot - (rows.filter(q=>q.value>0).length>1?0.03:0);
+    const large=(a1-a0)>Math.PI?1:0, p=(a,rad)=>[cx+rad*Math.cos(a), cy+rad*Math.sin(a)];
+    const [x0,y0]=p(a0,R),[x1,y1]=p(a1,R),[x2,y2]=p(a1,r),[x3,y3]=p(a0,r);
+    const d=(a1-a0)>=2*Math.PI-0.001 ? `M${cx},${cy-R}A${R},${R} 0 1 1 ${cx-0.01},${cy-R}L${cx-0.01},${cy-r}A${r},${r} 0 1 0 ${cx},${cy-r}Z`
+      : `M${x0},${y0}A${R},${R} 0 ${large} 1 ${x1},${y1}L${x2},${y2}A${r},${r} 0 ${large} 0 ${x3},${y3}Z`;
+    const n=el(s,'path',{d,fill:x.color,class:'hit'}); n.dataset.tip=x.tip; a0=a0+2*Math.PI*x.value/tot; });
+  el(s,'text',{x:cx,y:cy+2,'text-anchor':'middle',class:'val',style:'font-size:16px'},centerLabel[0]);
+  el(s,'text',{x:cx,y:cy+17,'text-anchor':'middle'},centerLabel[1]);
+  const lx=2*R+22; rows.forEach((x,i)=>{ const y=cy-(rows.length-1)*13+i*26;
+    el(s,'rect',{x:lx,y:y-9,width:10,height:10,rx:2,fill:x.color});
+    el(s,'text',{x:lx+16,y:y},x.label);
+    el(s,'text',{x:lx+16,y:y+12,class:'val'},x.text); });
+  box.appendChild(s); bindTips(box);
+}
+
 // 100% stacked rows per event
 function phaseRows(box){
   const W=box.clientWidth, rh=30, LW=Math.min(190,W*0.34), H=EV.length*rh+2; const s=svg(W,H); const cols=[C.c1,C.c2,C.c3]; const names=['Nach erster Ankündigung','Nach Erinnerung','Nach Anmeldeschluss'];
@@ -246,14 +267,14 @@ function render(){
   const scope = state.ev ? evs[0].t : 'alle Veranstaltungen';
   if(state.p===1){
     page.innerHTML = kpiCards([[evs.length,'Veranstaltungen'],[fmt(P),'Angemeldete Personen'],[fmt(ER),'Angemeldete Erwachsene'],[fmt(KI),'Angemeldete Kinder'],[pc(NEU,P),'Anteil Erstanmeldungen']])
-      + card('s8','Angemeldete Personen je Veranstaltung','Klicken Sie auf eine Säule, um alle Seiten zu filtern',lg([[C.c1,'Erwachsene'],[C.c2,'Kinder']]),'c1')
+      + card('s8 r2','Angemeldete Personen je Veranstaltung','Klicken Sie auf eine Säule, um alle Seiten zu filtern',lg([[C.c1,'Erwachsene'],[C.c2,'Kinder']]),'c1')
       + card('s4','Kinder nach Altersgruppe',scope,'','c2')
-      + card('s12','Eintritt',scope,'','c3');
-    eventColumns($('c1'),[{color:C.c1,label:'Erwachsene',val:e=>e.er},{color:C.c2,label:'Kinder',val:e=>e.ki}]);
+      + card('s4','Eintritt',scope,'','c3');
+    eventColumns($('c1'),[{color:C.c1,label:'Erwachsene',val:e=>e.er},{color:C.c2,label:'Kinder',val:e=>e.ki}],{h: window.innerWidth>860 ? 380 : 220});
     const ag=[0,1,2].map(k=>sum(evs,e=>e.age[k])); const at=ag[0]+ag[1]+ag[2];
-    hbars($('c2'),['Bis 6 Jahre','6–12 Jahre','Über 12 Jahre'].map((l,k)=>({label:l,value:ag[k],color:C.age[k],text:`${ag[k]} · ${pc(ag[k],at)}`,tip:`${l}: ${ag[k]} Kinder`})),{lw:92});
+    donut($('c2'),['Bis 6 Jahre','6–12 Jahre','Über 12 Jahre'].map((l,k)=>({label:l,value:ag[k],color:C.age[k],text:`${ag[k]} · ${pc(ag[k],at)}`,tip:`${l}: ${ag[k]} Kinder (${pc(ag[k],at)})`})),[fmt(at),'Kinder']);
     const fr=sum(evs,e=>e.frei);
-    hbars($('c3'),[{label:'Kostenlos',value:fr,color:C.c1,text:`${fmt(fr)} · ${pc(fr,P)}`,tip:`Kostenloser Eintritt (Mitglieder): ${fr} Personen`},{label:'Kostenpflichtig',value:P-fr,color:C.dim,text:`${fmt(P-fr)} · ${pc(P-fr,P)}`,tip:`Kostenpflichtig: ${P-fr} Personen`}],{lw:110});
+    donut($('c3'),[{label:'Kostenlos',value:fr,color:C.c1,text:`${fmt(fr)} · ${pc(fr,P)}`,tip:`Kostenloser Eintritt: ${fr} Personen (${pc(fr,P)})`},{label:'Kostenpflichtig',value:P-fr,color:C.c2,text:`${fmt(P-fr)} · ${pc(P-fr,P)}`,tip:`Kostenpflichtig: ${P-fr} Personen (${pc(P-fr,P)})`}],[fmt(P),'Personen']);
   }
   if(state.p===2){
     page.innerHTML = kpiCards([[eur(BUD),'Budget'],[eur(SP),'Tatsächliche Ausgaben'],[eur(BUD-SP),'Restbudget'],[pc(SP,BUD),'Budget verbraucht']])
@@ -262,8 +283,9 @@ function render(){
       + card('s12','Neue und wiederkehrende Personen','Erstanmeldung = erste Veranstaltung der Familie',lg([[C.c1,'Wiederkehrend'],[C.c2,'Neu']]),'c3');
     eventColumns($('c1'),[{color:C.c1,label:'Sachausgaben',val:e=>spent(e)-(e.cat['Helfer-Honorare']||0)},{color:C.c2,label:'Helfer-Honorare',val:e=>e.cat['Helfer-Honorare']||0}],{ref:EV[0].b,refLabel:'Budget '+eur(EV[0].b),lab:eur,h:240});
     const cats={}; evs.forEach(e=>Object.entries(e.cat).forEach(([k,v])=>cats[k]=(cats[k]||0)+v));
-    const rows=Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({label:k.replace('Veranstaltungsmaterial','Material'),value:v,color:k==='Helfer-Honorare'?C.c2:C.c1,text:`${eur(v)} · ${pc(v,SP)}`,tip:`${k}: ${fmt(v,2)} €`}));
-    hbars($('c2'),rows,{lw:118});
+    const CC={'Lebensmittel':C.c1,'Kinderprogramm':C.c3,'Veranstaltungsmaterial':'#9cc3ef','Helfer-Honorare':C.c2};
+    const rows=Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({label:k.replace('Veranstaltungsmaterial','Material'),value:v,color:CC[k]||C.dim,text:`${eur(v)} · ${pc(v,SP)}`,tip:`${k}: ${fmt(v,2)} € (${pc(v,SP)})`}));
+    donut($('c2'),rows,[eur(SP),'gesamt']);
     eventColumns($('c3'),[{color:C.c1,label:'Wiederkehrend',val:e=>e.p-e.neu},{color:C.c2,label:'Neu',val:e=>e.neu}],{h:200});
   }
   if(state.p===3){
