@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unpünktliche Flüge LAX – Iryna Levynska</title>
+  <meta name="description" content="Power-BI- und SQL-Abschlussprojekt: Analyse von 1,26 Mio. Flügen am Flughafen Los Angeles 2015–2017.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root { --c1:#2b6cb0; --c2:#d9822b; --card:#fffdf9; --frame:#f1e8da; }
+    .lead { font-size:1.02rem; line-height:1.7; color:var(--color-text-muted); max-width:680px; margin:0 0 22px; }
+    .actions { display:flex; flex-wrap:wrap; gap:14px; }
+    .wide { max-width:1200px; }
+    .report { background:var(--frame); border:1px solid var(--color-border); border-radius:10px; padding:14px; }
+    .bar { display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .tabs { display:flex; flex-wrap:wrap; gap:6px; }
+    .tab { font:600 .82rem var(--font-main); padding:8px 14px; border-radius:6px; border:1px solid var(--color-border); background:var(--card); color:var(--color-text-muted); cursor:pointer; }
+    .tab[aria-selected="true"] { background:var(--color-ink); color:var(--color-on-ink); border-color:var(--color-ink); }
+    .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; }
+    .card { background:var(--card); border-radius:8px; padding:14px 16px; border:1px solid #eadfcd; min-width:0; }
+    .kpi .v { font-family:var(--font-display); font-size:1.9rem; font-weight:600; line-height:1.1; }
+    .kpi .l { font-size:.8rem; color:var(--color-text-muted); margin-top:4px; }
+    .split { display:flex; height:10px; border-radius:5px; overflow:hidden; margin-top:10px; background:#e9dfcf; }
+    .split i { display:block; height:100%; }
+    .legend { display:flex; flex-wrap:wrap; gap:4px 14px; font-size:.76rem; color:var(--color-text-muted); margin-top:6px; }
+    .legend i { display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:5px; }
+    .shot { background:#fff; border:1px solid #eadfcd; border-radius:8px; padding:8px; }
+    .shot img { display:block; width:100%; height:auto; border-radius:4px; }
+    .shot p { font-size:.85rem; color:var(--color-text-muted); margin:10px 6px 4px; line-height:1.55; }
+    .hint { font-size:.76rem; color:var(--color-text-muted); margin-top:10px; }
+    .insights { margin:0; padding:0; list-style:none; counter-reset:i; }
+    .insights li { position:relative; padding:0 0 18px 40px; line-height:1.65; }
+    .insights li::before { counter-increment:i; content:counter(i); position:absolute; left:0; top:0; width:26px; height:26px; border-radius:50%; background:var(--color-accent-soft); color:var(--color-accent); font-weight:700; font-size:.85rem; display:flex; align-items:center; justify-content:center; }
+    .facts { margin:0; font-size:.93rem; line-height:1.7; }
+    .facts dt { font-weight:700; margin-top:10px; } .facts dd { margin:0; color:var(--color-text-muted); }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
+    .back { display:inline-block; margin-bottom:18px; font-size:.85rem; font-weight:600; color:var(--color-accent); }
+    .badge { display:inline-block; font-size:.78rem; font-weight:600; background:var(--color-accent-soft); color:var(--color-accent); padding:4px 10px; border-radius:20px; margin:0 0 14px; }
+    @media (max-width:860px) { .two-col { grid-template-columns:1fr; gap:24px; } }
+    @media (max-width:480px) { .report { padding:10px; } .kpi .v { font-size:1.5rem; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Iryna Levynska</h1>
+  <nav>
+    <a href="index.html">Start</a>
+    <a href="portfolio.html">Projekte</a>
+    <a href="achievements.html">Zertifikate</a>
+    <a href="contact.html">Kontakt</a>
+  </nav>
+</header>
+
+<section>
+  <a href="portfolio.html" class="back">← Alle Projekte</a>
+  <span class="eyebrow-label">Power BI · PostgreSQL · DAX</span>
+  <h2>Unpünktliche Flüge am Flughafen Los Angeles</h2>
+  <span class="badge">Abschlussprojekt · Business Intelligence Specialist (StackFuel) · Juni 2024</span>
+  <p class="lead">Ein Flughafenbetreiber will unpünktliche Flüge regelmäßig untersuchen. Mein Bericht analysiert 1,26 Millionen Flüge von und nach LAX (2015–2017) – getrennt nach Abflug und Ankunft: wichtigste Kennzahlen, die unpünktlichsten Airlines und die Zeiträume, in denen sich Unpünktlichkeit häuft.</p>
+  <div class="actions">
+    <a href="https://github.com/Levynska-I-DS/Portfolio/tree/main/Project_03" target="_blank" rel="noopener" class="button">Details auf GitHub</a>
+  </div>
+</section>
+
+<section class="wide">
+  <div class="report">
+    <div class="bar">
+      <div class="tabs" role="tablist" id="kt">
+        <button class="tab" role="tab" data-k="all" aria-selected="true">Flüge</button>
+        <button class="tab" role="tab" data-k="arr" aria-selected="false">Ankünfte</button>
+        <button class="tab" role="tab" data-k="dep" aria-selected="false">Abflüge</button>
+      </div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </div>
+  <p class="hint">Unpünktlich = Abweichung von mindestens 5 Minuten vom Flugplan, zu spät <em>oder</em> zu früh (Vorgabe der Aufgabe). Ø Unpünktlichkeit bezieht sich nur auf unpünktliche Flüge.</p>
+</section>
+
+<section class="wide">
+  <span class="eyebrow-label">Der Power-BI-Bericht</span>
+  <div class="report">
+    <div class="bar">
+      <div class="tabs" role="tablist" id="st">
+        <button class="tab" role="tab" data-s="0" aria-selected="true">Übersicht</button>
+        <button class="tab" role="tab" data-s="1" aria-selected="false">Fluggesellschaften</button>
+        <button class="tab" role="tab" data-s="2" aria-selected="false">Zeiträume</button>
+        <button class="tab" role="tab" data-s="3" aria-selected="false">Einflussfaktoren</button>
+      </div>
+    </div>
+    <div class="shot"><img id="simg" src="assets/img/flights/1.jpg" alt="" width="1600" height="891"><p id="stxt"></p></div>
+  </div>
+  <p class="hint">Screenshots aus Power BI Desktop. Die Schaltflächen Flüge / Ankünfte / Abflüge oben im Bericht steuern alle Kennzahlen einer Seite.</p>
+</section>
+
+<section>
+  <span class="eyebrow-label">Erkenntnisse</span>
+  <ol class="insights">
+    <li><strong>Zu früh ist bei Ankünften das häufigste Problem.</strong> 46&nbsp;% der Flüge landen mindestens 5 Minuten vor Plan, nur 36&nbsp;% zu spät. Für den Flughafen heißt das: Gates und Bodenpersonal müssen früher bereitstehen.</li>
+    <li><strong>Top 3 Airlines nach Ø Unpünktlichkeit:</strong> Envoy Air (39,6 Min, aber nur 309 Flüge), Frontier Airlines (30,7 Min, 78&nbsp;% unpünktlich) und JetBlue Airways (30,1 Min, 74&nbsp;% unpünktlich).</li>
+    <li><strong>Verspätungen bauen sich über den Tag auf.</strong> Vormittags ist der Anteil unpünktlicher Flüge am niedrigsten (65&nbsp;%), abends am höchsten (75&nbsp;%). Der Dezember ist der schwächste Monat.</li>
+    <li><strong>Leicht steigender Trend:</strong> von 68&nbsp;% unpünktlichen Flügen (2015) auf 73&nbsp;% (2017).</li>
+    <li><strong>Lange Rollzeiten sind ein Warnsignal.</strong> Laut Key-Influencers-Analyse steigt die Wahrscheinlichkeit der Unpünktlichkeit bei über 37 Minuten Taxi-In um den Faktor 1,26.</li>
+  </ol>
+</section>
+
+<section>
+  <div class="two-col">
+    <div>
+      <span class="eyebrow-label">Umsetzung</span>
+      <dl class="facts">
+        <dt>SQL</dt><dd>Eigene PostgreSQL-Abfrage direkt in Power BI: nur LAX, 2015–2017, ohne gestrichene/umgeleitete Flüge; Abflug/Ankunft per <code>CASE WHEN</code>, Abweichung per <code>ABS</code>.</dd>
+        <dt>Power Query</dt><dd>Uhrzeiten im Format hhmm (ohne führende Nullen, mit 2400) in echte Zeitwerte umgewandelt.</dd>
+        <dt>Datenmodell &amp; DAX</dt><dd>Kalendertabelle, Airline-Dimension, berechnete Spalte pünktlich/unpünktlich, über 30 Measures; eine Auswahltabelle mit <code>SWITCH</code> schaltet zwischen Flügen, Ankünften und Abflügen.</dd>
+        <dt>Storytelling</dt><dd>15-minütige Präsentation der Ergebnisse für die Abteilungsleitungen.</dd>
+      </dl>
+    </div>
+    <div>
+      <span class="eyebrow-label">Daten &amp; Rückblick</span>
+      <dl class="facts">
+        <dt>Quelle</dt><dd>Bureau of Transportation Statistics (U.S. Department of Transportation), bereitgestellt in einer Kursdatenbank: 1.264.229 Flüge.</dd>
+        <dt>Stand</dt><dd>Kursprojekt aus dem Jahr 2024. Die .pbix enthält die Daten; der Zugang zur Datenbank besteht nicht mehr.</dd>
+        <dt>Heute würde ich</dt><dd>zusätzlich den Branchenstandard „verspätet ≥ 15 Min“ zeigen (Ankunft 23&nbsp;%, Abflug 22&nbsp;%), „zu früh“ und „zu spät“ getrennt ausweisen und für Rankings eine Mindestanzahl an Flügen festlegen.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2026 Iryna Levynska · <a href="portfolio-datenschutz.html">Datenschutz</a>
+</footer>
+
+<script>
+const K = {
+  all:{n:'1.264.229', u:70.2, late:34.9, early:35.2, avg:'26,4'},
+  arr:{n:'632.275',   u:82.0, late:35.7, early:46.3, avg:'26,5'},
+  dep:{n:'631.954',   u:58.3, late:34.2, early:24.1, avg:'26,3'}
+};
+const S = [
+  'Übersicht: Anzahl der Flüge, Anteil pünktlich/unpünktlich, täglicher Verlauf 2015–2017 und Trend nach Jahr, Quartal und Monat.',
+  'Fluggesellschaften: Top 3 nach Anzahl unpünktlicher Flüge und Ø Unpünktlichkeit in Minuten je Airline.',
+  'Zeiträume: Ø Verspätung nach Wochentag, täglicher Anteil unpünktlicher Abflüge und Verteilung über die Uhrzeit für Abflüge und Ankünfte.',
+  'Einflussfaktoren: Key-Influencers-Visual – lange Rollzeiten (Taxi-In, Taxi-Out) erhöhen die Wahrscheinlichkeit der Unpünktlichkeit.'
+];
+const pct = x => x.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1})+' %';
+function kpis(k){
+  const d=K[k];
+  document.getElementById('kpis').innerHTML =
+    `<div class="card kpi"><div class="v">${d.n}</div><div class="l">Flüge</div></div>`+
+    `<div class="card kpi"><div class="v">${pct(d.u)}</div><div class="l">unpünktlich (±5 Min)</div>`+
+      `<div class="split" aria-hidden="true"><i style="width:${d.late}%;background:var(--c1)"></i><i style="width:${d.early}%;background:var(--c2)"></i></div>`+
+      `<div class="legend"><span><i style="background:var(--c1)"></i>zu spät ${pct(d.late)}</span><span><i style="background:var(--c2)"></i>zu früh ${pct(d.early)}</span></div></div>`+
+    `<div class="card kpi"><div class="v">${pct(100-d.u)}</div><div class="l">pünktlich</div></div>`+
+    `<div class="card kpi"><div class="v">${d.avg} Min</div><div class="l">Ø Unpünktlichkeit</div></div>`;
+}
+function sel(group, attr, fn){
+  group.addEventListener('click', e => {
+    const b=e.target.closest('button'); if(!b) return;
+    group.querySelectorAll('button').forEach(x=>x.setAttribute('aria-selected', x===b));
+    fn(b.dataset[attr]);
+  });
+}
+function shot(i){
+  const img=document.getElementById('simg');
+  img.src=`assets/img/flights/${+i+1}.jpg`; img.alt=S[i].split(':')[0];
+  document.getElementById('stxt').textContent=S[i];
+}
+sel(document.getElementById('kt'),'k',kpis);
+sel(document.getElementById('st'),'s',shot);
+kpis('all'); shot(0);
+</script>
+
+</body>
+</html>
