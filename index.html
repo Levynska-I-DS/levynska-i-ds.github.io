@@ -4,7 +4,40 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Iryna Levynska – Data Analyst & Business Intelligence</title>
+  <meta name="description" content="Iryna Levynska – Data Analyst und Business Intelligence mit Hintergrund in Physik und angewandter Forschung.">
   <link rel="stylesheet" href="style.css">
+  <style>
+    .about-photo { width:200px; height:200px; border-radius:50%; filter:none; box-shadow:0 2px 10px rgba(22,40,58,.12); }
+    .timeline { list-style:none; margin:0; padding:0; position:relative; }
+    .timeline::before { content:""; position:absolute; left:9px; top:6px; bottom:6px; width:2px; background:var(--color-border); }
+    .tl { position:relative; padding:0 0 34px 40px; }
+    .tl:last-child { padding-bottom:0; }
+    .tl::before { content:""; position:absolute; left:2px; top:5px; width:16px; height:16px; border-radius:50%; background:var(--color-bg-section); border:3px solid var(--color-accent); box-sizing:border-box; }
+    .tl .when { font-size:.8rem; font-weight:700; letter-spacing:.06em; color:var(--color-accent); margin:0 0 2px; }
+    .tl h3 { font-family:var(--font-display); font-size:1.2rem; margin:0 0 6px; }
+    .tl p { margin:0 0 8px; line-height:1.65; color:var(--color-text-muted); }
+    .tl p strong { color:var(--color-text); }
+    .tl-media { display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; }
+    .tl-media figure { margin:0; background:#fff; border:1px solid var(--color-border); border-radius:8px; padding:6px; max-width:300px; flex:1 1 220px; }
+    .tl-media figure.narrow { max-width:170px; flex:0 1 150px; }
+    .tl-media img { display:block; width:100%; height:auto; border-radius:4px; }
+    .tl-media figcaption { font-size:.76rem; color:var(--color-text-muted); margin:6px 2px 2px; line-height:1.4; }
+    .facts-row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:14px 0 6px; max-width:520px; }
+    .fact { background:var(--color-bg-section); border:1px solid var(--color-border); border-radius:8px; padding:10px 12px; }
+    .fact .v { font-family:var(--font-display); font-size:1.6rem; font-weight:600; line-height:1.1; color:var(--color-text); }
+    .fact .l { font-size:.76rem; color:var(--color-text-muted); }
+    details.pubs { margin-top:10px; border:1px solid var(--color-border); border-radius:8px; background:var(--color-bg-section); }
+    details.pubs summary { cursor:pointer; padding:10px 14px; font-weight:600; font-size:.9rem; color:var(--color-accent); }
+    details.pubs .inner { padding:0 16px 14px; font-size:.86rem; line-height:1.6; color:var(--color-text-muted); }
+    details.pubs h4 { font-size:.82rem; letter-spacing:.06em; text-transform:uppercase; color:var(--color-text); margin:14px 0 6px; }
+    details.pubs ol, details.pubs ul { margin:0; padding-left:20px; }
+    details.pubs li { margin-bottom:6px; }
+    .bridge { border-left:3px solid var(--color-accent); padding:4px 0 4px 14px; margin:12px 0 0; color:var(--color-text); }
+    .personal { display:flex; gap:24px; align-items:center; flex-wrap:wrap; }
+    .personal img { width:150px; height:200px; object-fit:cover; border-radius:8px; }
+    .personal p { flex:1; min-width:240px; line-height:1.7; margin:0; }
+    @media (max-width:480px) { .facts-row { grid-template-columns:repeat(3,minmax(0,1fr)); } .fact .v { font-size:1.3rem; } .tl-media figure, .tl-media figure.narrow { max-width:none; flex:1 1 100%; } .personal { justify-content:center; text-align:center; } }
+  </style>
 </head>
 <body>
 
@@ -19,7 +52,7 @@
   </nav>
 </header>
 
-<!-- HERO: name + short intro only, no photo -->
+<!-- HERO -->
 <section id="home" class="hero">
   <div class="hero-content">
     <span class="eyebrow-label">Data Analyst &amp; Business Intelligence</span>
@@ -39,17 +72,98 @@
   </div>
 </section>
 
-<!-- ABOUT: small, modest photo beside the fuller bio text -->
+<!-- ABOUT -->
 <section id="about">
   <span class="eyebrow-label">Über mich</span>
   <div class="about-flex">
-    <img src="assets/img/Levynska.jpg" alt="Profilbild von Iryna Levynska" class="about-photo">
+    <img src="assets/img/about/portrait.jpg" alt="Iryna Levynska" class="about-photo" width="200" height="200">
     <div class="about-text">
       <h2>Kurz zu mir</h2>
-      <p>In den letzten Jahren habe ich mich intensiv weitergebildet, unter anderem in Data Analytics und Business Intelligence (StackFuel, Berlin), und praktische Aufgaben auf Basis echter Geschäftsdaten bearbeitet.</p>
-      <p>Meine aktuellen Fähigkeiten umfassen: Power BI (Dashboards, Datenmodellierung, DAX-Grundlagen), Python (Pandas, NumPy, einfache ML-Modelle), SQL (Basisabfragen), Datenaufbereitung und Visualisierung sowie grundlegende Statistik.</p>
-      <p>Ich arbeite praxisnah, lerne kontinuierlich neue Tools und demonstriere durch kleine Projekte und Analysen, wie Daten echte Entscheidungen unterstützen können. Mit großem Potenzial und Motivation möchte ich Unternehmen und Projekten durch präzise Analysen, kreative Ideen und datenbasierte Insights helfen.</p>
+      <p>Ich bin Physikerin, habe Mathematik und Physik unterrichtet und sechs Jahre in der angewandten Forschung gearbeitet – mit Experimenten, Messreihen, mathematischen Modellen und Patenten. In Deutschland habe ich mich zur Data Analystin und BI-Spezialistin weitergebildet (StackFuel, Berlin).</p>
+      <p>Meine aktuellen Fähigkeiten umfassen: Power BI (Dashboards, Datenmodellierung, DAX), SQL (PostgreSQL, SQL Server), Python (Pandas, NumPy, scikit-learn), Datenaufbereitung und Visualisierung sowie Statistik.</p>
+      <p>Ich arbeite praxisnah, lerne kontinuierlich neue Tools und zeige in meinen Projekten, wie Daten echte Entscheidungen unterstützen können.</p>
     </div>
+  </div>
+</section>
+
+<!-- MEIN WEG -->
+<section id="weg">
+  <span class="eyebrow-label">Mein Weg</span>
+  <h2>Von der Physik zu den Daten</h2>
+  <ol class="timeline">
+    <li class="tl">
+      <p class="when">2001 – 2006</p>
+      <h3>Studium der Physik</h3>
+      <p>Bachelor und Master of Science in Physik sowie Lehramtsdiplom (Physik und Mathematik), Nationale Taras-Schewtschenko-Universität Luhansk. Masterarbeit über die optischen Eigenschaften dünner Kohlenstoff-Stickstoff-Schichten.</p>
+    </li>
+    <li class="tl">
+      <p class="when">2005 – 2008</p>
+      <h3>Lehrerin für Mathematik und Physik</h3>
+      <p>Unterricht an einer höheren Berufsschule in Luhansk – komplexe Inhalte verständlich erklären und strukturieren.</p>
+      <div class="tl-media">
+        <figure><img src="assets/img/about/lehrerin.jpg" alt="Iryna Levynska an der Tafel im Unterricht" loading="lazy" width="640" height="430"><figcaption>Im Unterricht, 2005</figcaption></figure>
+      </div>
+    </li>
+    <li class="tl">
+      <p class="when">2008 – 2014</p>
+      <h3>Angewandte Forschung</h3>
+      <p>Wissenschaftliche Mitarbeiterin und Doktorandin an der Ostukrainischen Wolodymyr-Dahl-Universität. Ich habe untersucht, wie sich komplex geformte Metallteile effizienter schleifen und polieren lassen – in einer Kammer, in der Druckluft das Schleifmittel in einen schwebenden Zustand versetzt (Wirbelschicht).</p>
+      <p>Dafür habe ich <strong>Experimente geplant und durchgeführt, Messreihen ausgewertet, mathematische Modelle verglichen</strong> und daraus Verbesserungen für die Anlagen abgeleitet. Zwei davon sind als Patente geschützt.</p>
+      <div class="facts-row">
+        <div class="fact"><div class="v">22</div><div class="l">wissenschaftliche Arbeiten</div></div>
+        <div class="fact"><div class="v">17</div><div class="l">Konferenzbeiträge</div></div>
+        <div class="fact"><div class="v">2</div><div class="l">Patente (Ukraine)</div></div>
+      </div>
+      <div class="tl-media">
+        <figure><img src="assets/img/about/forschung.jpg" alt="Iryna Levynska an ihrem Arbeitsplatz an der Universität" loading="lazy" width="640" height="353"><figcaption>Am Arbeitsplatz an der Universität</figcaption></figure>
+        <figure class="narrow"><img src="assets/img/about/patent.jpg" alt="Titelseite des Patents UA 71372 mit Zeichnung der Vorrichtung" loading="lazy" width="560" height="715"><figcaption>Patent UA 71372 (2012)</figcaption></figure>
+      </div>
+      <details class="pubs">
+        <summary>Patente und ausgewählte Veröffentlichungen</summary>
+        <div class="inner">
+          <h4>Patente (Gebrauchsmuster, Ukraine)</h4>
+          <ul>
+            <li><strong>UA 71372 U</strong> – Vorrichtung zur Bearbeitung von Teilen mit freiem Schleifmittel. I. M. Levynska, O. S. Zuiev, S. Ye. Dzei. Veröffentlicht am 10.07.2012.</li>
+            <li><strong>UA 76764 U</strong> – Vorrichtung zur Bearbeitung von Teilen in freiem Schleifmittel. O. S. Zuiev, I. M. Levynska, S. M. Yasunik. Veröffentlicht am 10.01.2013.</li>
+          </ul>
+          <h4>Ausgewählte Fachartikel (Titel übersetzt)</h4>
+          <ol>
+            <li>Analyse von Anlagenschemata für die Turboschleifbearbeitung. <em>Ost-europäisches Journal fortgeschrittener Technologien</em>, 2009, Nr. 5/1 (41), S. 13–18. (mit G. Yu. Burlakova, L. M. Lubenska)</li>
+            <li>Zur Bearbeitung von Teilen mit dem Turboschleifverfahren. <em>Vibrationen in Technik und Technologien</em>, 2010, Nr. 2 (58), S. 111–119. (Alleinautorin)</li>
+            <li>Überblick über mathematische Modelle des Turboschleifprozesses. <em>Vibrationen in Technik und Technologien</em>, 2010, Nr. 3 (59), S. 46–54. (mit O. S. Zuiev)</li>
+            <li>Analyse der Oberflächenschicht nach verschiedenen Bearbeitungsverfahren mit freiem Schleifmittel. <em>Vibrationen in Technik und Technologien</em>, 2011, Nr. 3 (63), S. 50–56. (mit S. Ye. Dzei, L. M. Lubenska, A. P. Nikolaienko)</li>
+            <li>Zur Turboschleifbearbeitung von Teilen. <em>Automatisierung von Produktionsprozessen im Maschinen- und Gerätebau</em>, Polytechnische Universität Lwiw, 2011, Nr. 45, S. 302–308. (mit O. S. Zuiev, L. M. Lubenska)</li>
+            <li>Intensivierung der Bearbeitung von Teilen in der Wirbelschicht aus Schleifmittel. <em>Wissenschaftlicher Bote der DDMA</em>, 2012, Nr. 2 (10E), S. 66–70. (mit S. M. Yasunik, O. S. Zuiev)</li>
+            <li>Produktivität der Turboschleifbearbeitung in Anlagen mit zusätzlicher Rohrleitung. <em>Bote der SevNTU</em>, 2013, Nr. 139, S. 79–83. (mit O. S. Zuiev, S. M. Yasunik)</li>
+          </ol>
+        </div>
+      </details>
+      <p class="bridge">Was ich daraus mitnehme: Untersuchungen sauber planen, Messdaten kritisch prüfen, Modelle mit der Realität vergleichen und Ergebnisse verständlich berichten – genau das brauche ich heute in der Datenanalyse.</p>
+    </li>
+    <li class="tl">
+      <p class="when">2014 – 2022</p>
+      <h3>Neuanfang in Deutschland</h3>
+      <p>Familienphase und Deutsch bis zum Niveau C1 (telc).</p>
+    </li>
+    <li class="tl">
+      <p class="when">2022 – 2024</p>
+      <h3>Weiterbildung Data &amp; BI</h3>
+      <p>Data Analyst / Data Scientist und Business Intelligence Analyst bei StackFuel (Berlin), dazu IBM SPSS – Python, SQL, Machine Learning, Power BI, DAX und Data Storytelling.</p>
+    </li>
+    <li class="tl">
+      <p class="when">seit 2025</p>
+      <h3>Daten in der Praxis</h3>
+      <p>Ehrenamtliche Leitung eines Kinder- und Familienprogramms: Planung für über 50 Familien, ein eigenes Anmeldesystem mit PostgreSQL und Auswertungen mit SQL und Power BI. <a href="projekt-event-dashboard.html">Zum Dashboard-Projekt →</a></p>
+    </li>
+  </ol>
+</section>
+
+<!-- PERSÖNLICH -->
+<section id="persoenlich">
+  <span class="eyebrow-label">Persönlich</span>
+  <div class="personal">
+    <img src="assets/img/about/musik.jpg" alt="Iryna Levynska singt auf einer Bühne" loading="lazy" width="150" height="200">
+    <p>Musik begleitet mich seit meiner Kindheit: Ich singe – unter anderem als Preisträgerin eines regionalen Festivals – und spiele Klavier. Auf der Bühne habe ich gelernt, gut vorbereitet und ruhig zu bleiben, wenn es darauf ankommt.</p>
   </div>
 </section>
 
