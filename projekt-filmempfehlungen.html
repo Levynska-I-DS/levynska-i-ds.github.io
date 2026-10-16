@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Filmempfehlungen mit MovieLens – Iryna Levynska</title>
+  <meta name="description" content="Data-Science-Projekt: Empfehlungssystem auf MovieLens – Datenanalyse, Modellvergleich (SVD, KNN, EASE) und interaktive Demo.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root { --c1:#2b6cb0; --c2:#d9822b; --c3:#a23b5a; --dim:#c9ced6; --card:#fffdf9; --frame:#f1e8da; }
+    .lead { font-size:1.02rem; line-height:1.7; color:var(--color-text-muted); max-width:680px; margin:0 0 22px; }
+    .actions { display:flex; flex-wrap:wrap; gap:14px; }
+    .wide { max-width:1200px; }
+    .badge { display:inline-block; font-size:.78rem; font-weight:600; background:var(--color-accent-soft); color:var(--color-accent); padding:4px 10px; border-radius:20px; margin:0 0 14px; }
+    .report { background:var(--frame); border:1px solid var(--color-border); border-radius:10px; padding:14px; }
+    .bar { display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .tabs { display:flex; flex-wrap:wrap; gap:6px; }
+    .tab { font:600 .82rem var(--font-main); padding:8px 14px; border-radius:6px; border:1px solid var(--color-border); background:var(--card); color:var(--color-text-muted); cursor:pointer; }
+    .tab[aria-selected="true"] { background:var(--color-ink); color:var(--color-on-ink); border-color:var(--color-ink); }
+    .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:12px; }
+    .card { background:var(--card); border-radius:8px; padding:14px 16px; border:1px solid #eadfcd; min-width:0; }
+    .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:12px; }
+    .kpi .v { font-family:var(--font-display); font-size:1.8rem; font-weight:600; line-height:1.1; }
+    .kpi .l { font-size:.8rem; color:var(--color-text-muted); margin-top:4px; }
+    .card h3 { font-family:var(--font-main); font-size:.92rem; font-weight:700; margin:0 0 2px; }
+    .card .sub { font-size:.8rem; color:var(--color-text-muted); margin:0 0 10px; line-height:1.5; }
+    .s6 { grid-column:span 6; } .s12 { grid-column:1/-1; } .s7 { grid-column:span 7; } .s5 { grid-column:span 5; }
+    .legend { display:flex; flex-wrap:wrap; gap:4px 14px; font-size:.76rem; color:var(--color-text-muted); margin:0 0 6px; }
+    .legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px; }
+    .chart svg { display:block; width:100%; overflow:visible; }
+    .chart text { font-family:var(--font-main); font-size:11px; fill:#6b5d4c; }
+    .chart .val { fill:#2a2420; font-weight:700; }
+    .hint { font-size:.76rem; color:var(--color-text-muted); margin-top:10px; }
+    #tip { position:fixed; pointer-events:none; background:#16283a; color:#f5f1e9; font-size:.78rem; line-height:1.45; padding:7px 10px; border-radius:6px; opacity:0; transition:opacity .1s; z-index:2000; max-width:260px; }
+    .callout { border-left:3px solid var(--c2); background:var(--card); padding:12px 16px; border-radius:0 8px 8px 0; margin-top:12px; line-height:1.6; font-size:.92rem; }
+    .lists { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .lists ol { margin:0; padding-left:20px; font-size:.84rem; line-height:1.55; }
+    .lists li span { color:var(--color-text-muted); font-size:.76rem; }
+    /* Demo */
+    .demo-top { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    .demo-top input { flex:1 1 260px; font:500 .95rem var(--font-main); padding:10px 12px; border:1px solid var(--color-border); border-radius:6px; background:#fff; }
+    .sugg { list-style:none; margin:6px 0 0; padding:0; border:1px solid var(--color-border); border-radius:6px; background:#fff; max-height:240px; overflow:auto; display:none; }
+    .sugg li { padding:8px 12px; cursor:pointer; font-size:.88rem; border-bottom:1px solid #f1e8da; }
+    .sugg li:hover, .sugg li.act { background:var(--color-accent-soft); }
+    .sugg li small { color:var(--color-text-muted); }
+    .chips { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0 4px; min-height:30px; }
+    .chip { display:inline-flex; align-items:center; gap:6px; background:var(--color-ink); color:var(--color-on-ink); border-radius:16px; padding:5px 10px; font-size:.8rem; }
+    .chip button { background:none; border:none; color:var(--color-on-ink); cursor:pointer; font-size:.9rem; line-height:1; padding:0; }
+    .quick { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+    .quick button { font:600 .76rem var(--font-main); padding:5px 10px; border-radius:14px; border:1px solid var(--color-border); background:var(--card); color:var(--color-text-muted); cursor:pointer; }
+    .quick button:hover { border-color:var(--c1); color:var(--c1); }
+    .recs { list-style:none; margin:0; padding:0; counter-reset:r; }
+    .recs li { display:grid; grid-template-columns:28px 1fr auto; gap:10px; align-items:center; padding:9px 0; border-bottom:1px solid #f1e8da; }
+    .recs li::before { counter-increment:r; content:counter(r); width:24px; height:24px; border-radius:50%; background:var(--color-accent-soft); color:var(--color-accent); font-weight:700; font-size:.78rem; display:flex; align-items:center; justify-content:center; }
+    .recs .t { font-weight:600; font-size:.92rem; }
+    .recs .m { font-size:.76rem; color:var(--color-text-muted); }
+    .recs .w { font-size:.74rem; color:var(--color-text-muted); text-align:right; max-width:200px; }
+    .muted { color:var(--color-text-muted); font-size:.88rem; }
+    .insights { margin:0; padding:0; list-style:none; counter-reset:i; }
+    .insights li { position:relative; padding:0 0 18px 40px; line-height:1.65; }
+    .insights li::before { counter-increment:i; content:counter(i); position:absolute; left:0; top:0; width:26px; height:26px; border-radius:50%; background:var(--color-accent-soft); color:var(--color-accent); font-weight:700; font-size:.85rem; display:flex; align-items:center; justify-content:center; }
+    .facts { margin:0; font-size:.93rem; line-height:1.7; }
+    .facts dt { font-weight:700; margin-top:10px; } .facts dd { margin:0; color:var(--color-text-muted); }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
+    .back { display:inline-block; margin-bottom:18px; font-size:.85rem; font-weight:600; color:var(--color-accent); }
+    @media (max-width:860px) { .s6,.s7,.s5 { grid-column:1/-1; } .two-col, .lists { grid-template-columns:1fr; gap:24px; } }
+    @media (max-width:480px) { .report { padding:10px; } .kpi .v { font-size:1.45rem; } .recs li { grid-template-columns:28px 1fr; } .recs .w { grid-column:2; text-align:left; max-width:none; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Iryna Levynska</h1>
+  <nav>
+    <a href="index.html">Start</a>
+    <a href="portfolio.html">Projekte</a>
+    <a href="achievements.html">Zertifikate</a>
+    <a href="contact.html">Kontakt</a>
+  </nav>
+</header>
+
+<section>
+  <a href="portfolio.html" class="back">← Alle Projekte</a>
+  <span class="eyebrow-label">Python · scikit-surprise · NumPy · Empfehlungssysteme</span>
+  <h2>Filmempfehlungen: Was macht ein gutes Empfehlungssystem aus?</h2>
+  <span class="badge">Lernprojekt · Teamprojekt StackFuel 2024, 2026 KI-gestützt weiterentwickelt</span>
+  <p class="lead">Streaming-Dienste schlagen Filme vor, die uns gefallen könnten. Dieses Lernprojekt untersucht mit den öffentlichen MovieLens-Daten, welche Verfahren dafür taugen – und zeigt, dass das Modell mit dem kleinsten Vorhersagefehler <strong>nicht</strong> die besten Empfehlungen liefert. Unten können Sie die Daten erkunden und das Modell selbst ausprobieren.</p>
+  <div class="actions">
+    <a href="https://github.com/Levynska-I-DS/movielens-empfehlungssystem" target="_blank" rel="noopener" class="button">Code und Notebooks auf GitHub</a>
+    <a href="#demo" class="button secondary">Zur Demo</a>
+  </div>
+</section>
+
+<section class="wide">
+  <span class="eyebrow-label">Die Daten</span>
+  <div class="report">
+    <div class="kpis" id="kpis"></div>
+    <div class="bar"><div class="tabs" role="tablist" id="dtabs">
+      <button class="tab" role="tab" data-t="0" aria-selected="true">Bewertungen</button>
+      <button class="tab" role="tab" data-t="1" aria-selected="false">Long Tail</button>
+      <button class="tab" role="tab" data-t="2" aria-selected="false">Wer bewertet?</button>
+      <button class="tab" role="tab" data-t="3" aria-selected="false">Genres</button>
+    </div></div>
+    <div class="grid" id="dpage"></div>
+  </div>
+  <p class="hint">Diagramme: MovieLens 1M (1 000 209 Bewertungen von 6 040 Personen, 2000–2003; enthält Alter, Geschlecht und Beruf). Fahren Sie über die Elemente für Details.</p>
+</section>
+
+<section class="wide">
+  <span class="eyebrow-label">Bestenlisten richtig berechnen</span>
+  <div class="report"><div class="lists">
+    <div class="card"><h3>Top 5 nach einfachem Mittelwert</h3><p class="sub">Filme mit einer einzigen 5-Sterne-Bewertung landen ganz oben – Zufall, nicht Qualität.</p><ol id="naiv"></ol></div>
+    <div class="card"><h3>Top 10 nach Bayes-Mittelwert</h3><p class="sub">Wenige Bewertungen werden zum Gesamtmittel gezogen (Gewicht: 100 Bewertungen). Jetzt stehen bewährte Klassiker oben.</p><ol id="bayes"></ol></div>
+  </div></div>
+</section>
+
+<section class="wide">
+  <span class="eyebrow-label">Modellvergleich</span>
+  <div class="report">
+    <div class="grid" id="mpage"></div>
+    <div class="callout" id="mcallout"></div>
+  </div>
+  <p class="hint">MovieLens 1M. Aufteilung pro Person zeitlich: die jüngsten 20 % der Bewertungen sind das Testset. „Relevant“ = im Testzeitraum mit 4–5 Sternen bewertet. Abdeckung = Anteil der Filme, die mindestens einer Person empfohlen werden.</p>
+</section>
+
+<section class="wide" id="demo">
+  <span class="eyebrow-label">Ausprobieren</span>
+  <div class="report">
+    <div class="grid">
+      <div class="card s5">
+        <h3>1. Filme wählen, die Ihnen gefallen</h3>
+        <p class="sub">Tippen Sie einen Titel (englische Originaltitel) oder starten Sie mit einem Beispiel. Drei bis fünf Filme genügen.</p>
+        <div class="demo-top"><input id="such" type="search" placeholder="z. B. Matrix, Amélie, Toy Story …" autocomplete="off" aria-label="Film suchen"></div>
+        <ul class="sugg" id="sugg" role="listbox"></ul>
+        <div class="chips" id="chips"></div>
+        <div class="quick" id="quick"></div>
+      </div>
+      <div class="card s7">
+        <h3>2. Empfehlungen des Modells</h3>
+        <p class="sub">EASE-Modell, trainiert auf 33,8 Mio. Bewertungen (1 500 meistbewertete Filme). Rechts steht, welcher Ihrer Filme am meisten zur Empfehlung beiträgt.</p>
+        <ol class="recs" id="recs"></ol>
+        <p class="muted" id="leer">Noch keine Filme gewählt.</p>
+      </div>
+    </div>
+  </div>
+  <p class="hint">Die Berechnung läuft direkt in Ihrem Browser – es werden keine Eingaben gespeichert oder übertragen.</p>
+</section>
+
+<section>
+  <span class="eyebrow-label">Erkenntnisse</span>
+  <ol class="insights">
+    <li><strong>Der kleinste Vorhersagefehler macht noch keine gute Empfehlung.</strong> SVD sagt Sternebewertungen am genauesten voraus, liefert aber die schwächste Top-10-Liste – sogar schwächer als „einfach die beliebtesten Filme“. Die Metrik muss zur Aufgabe passen.</li>
+    <li><strong>EASE ist der klare Gewinner für Empfehlungen.</strong> Es lernt, welche Filme gemeinsam geschaut werden, trifft am häufigsten und nutzt einen viel größeren Teil des Katalogs als die Beliebtheitsliste.</li>
+    <li><strong>Die Daten sind extrem ungleich verteilt.</strong> Die 10 % beliebtesten Filme erhalten 44 % aller Bewertungen, und 95,5 % aller Nutzer-Film-Kombinationen sind unbekannt.</li>
+    <li><strong>Ranglisten brauchen eine Mindestzahl an Bewertungen.</strong> Ohne Korrektur stehen Filme mit einer einzigen 5-Sterne-Bewertung an der Spitze.</li>
+    <li><strong>Die Nutzerschaft ist nicht repräsentativ</strong> (72 % Männer, mehrheitlich unter 35). Was als „beliebt“ gilt, spiegelt vor allem ihren Geschmack – ein Bias, den ein produktives System beobachten sollte.</li>
+  </ol>
+</section>
+
+<section>
+  <div class="two-col">
+    <div>
+      <span class="eyebrow-label">Umsetzung</span>
+      <dl class="facts">
+        <dt>Datenanalyse</dt><dd>pandas und matplotlib: Datenqualität, Verteilungen, Long Tail, Demografie, Bayes-Mittelwert.</dd>
+        <dt>Modelle</dt><dd>Baseline, Item-KNN und SVD (scikit-surprise), EASE (eigene Implementierung mit NumPy/SciPy), Beliebtheit als Vergleich. Hyperparameter per Kreuzvalidierung nur auf den Trainingsdaten.</dd>
+        <dt>Demo</dt><dd>EASE-Modell auf MovieLens latest (33,8 Mio. Bewertungen, 1 500 meistbewertete Filme), als kompakte JSON-Datei exportiert; die Empfehlung wird im Browser berechnet.</dd>
+        <dt>Bewertung</dt><dd>Zeitliche Aufteilung pro Person; RMSE/MAE für Vorhersagen, Precision@10, Recall@10 und Katalogabdeckung für Empfehlungen.</dd>
+      </dl>
+    </div>
+    <div>
+      <span class="eyebrow-label">Daten &amp; Hintergrund</span>
+      <dl class="facts">
+        <dt>Quelle</dt><dd>MovieLens 1M und MovieLens latest (Stand 07/2023), GroupLens Research, University of Minnesota. Öffentlich, anonymisiert.</dd>
+        <dt>Entstehung</dt><dd>2024 Teamprojekt der StackFuel-Weiterbildung – mein Anteil: Projektaufbau, Datenauswahl, Datenanalyse, Modelltraining und TMDB-Anreicherung. Damals wurde das Modell nur nach RMSE ausgewählt. 2026 wurde das Lernprojekt KI-gestützt (Claude) überarbeitet – zeitliche Aufteilung, Bewertung der Top-10-Listen, EASE und die interaktive Demo; die Fragestellungen stammen aus meinem Teamprojekt. <a href="https://github.com/Levynska-I-DS/MovieLens_Movie_Recommendation_System" target="_blank" rel="noopener">Teamprojekt 2024 ansehen</a></dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2026 Iryna Levynska · <a href="portfolio-datenschutz.html">Datenschutz</a>
+</footer>
+
+<div id="tip" role="tooltip"></div>
+
+<script>
+const D = {"verteilung":{"1":0.0562,"2":0.1075,"3":0.2611,"4":0.3489,"5":0.2263},"long_tail":[[0.0,0.0],[0.05,0.2828],[0.1,0.4438],[0.15,0.5615],[0.2,0.6516],[0.25,0.7229],[0.3,0.7809],[0.35,0.828],[0.4,0.8664],[0.45,0.898],[0.5,0.9237],[0.55,0.9439],[0.6,0.9598],[0.65,0.972],[0.7,0.9814],[0.75,0.9885],[0.8,0.9936],[0.85,0.9971],[0.9,0.9989],[0.95,0.9997],[1.0,1.0]],"alter":[{"gruppe":"unter 18","F":78,"M":144},{"gruppe":"18–24","F":298,"M":805},{"gruppe":"25–34","F":558,"M":1538},{"gruppe":"35–44","F":338,"M":855},{"gruppe":"45–49","F":189,"M":361},{"gruppe":"50–55","F":146,"M":350},{"gruppe":"56+","F":102,"M":278}],"genres":[{"genre":"Action","F":0.0902,"M":0.1327,"mittel":3.491,"bewertungen":257457},{"genre":"Adventure","F":0.054,"M":0.0668,"mittel":3.477,"bewertungen":133953},{"genre":"Animation","F":0.0242,"M":0.0195,"mittel":3.685,"bewertungen":43293},{"genre":"Children's","F":0.0421,"M":0.0319,"mittel":3.422,"bewertungen":72186},{"genre":"Comedy","F":0.1903,"M":0.1631,"mittel":3.522,"bewertungen":356580},{"genre":"Crime","F":0.0325,"M":0.0395,"mittel":3.709,"bewertungen":79541},{"genre":"Documentary","F":0.0038,"M":0.0037,"mittel":3.933,"bewertungen":7910},{"genre":"Drama","F":0.194,"M":0.1606,"mittel":3.766,"bewertungen":354529},{"genre":"Fantasy","F":0.0172,"M":0.0173,"mittel":3.447,"bewertungen":36301},{"genre":"Film-Noir","F":0.0083,"M":0.0088,"mittel":4.075,"bewertungen":18261},{"genre":"Horror","F":0.0289,"M":0.0387,"mittel":3.215,"bewertungen":76386},{"genre":"Musical","F":0.0267,"M":0.0176,"mittel":3.666,"bewertungen":41533},{"genre":"Mystery","F":0.0197,"M":0.0189,"mittel":3.668,"bewertungen":40178},{"genre":"Romance","F":0.0994,"M":0.0609,"mittel":3.607,"bewertungen":147523},{"genre":"Sci-Fi","F":0.0542,"M":0.0814,"mittel":3.467,"bewertungen":157294},{"genre":"Thriller","F":0.0797,"M":0.0936,"mittel":3.57,"bewertungen":189680},{"genre":"War","F":0.0279,"M":0.0341,"mittel":3.893,"bewertungen":68527},{"genre":"Western","F":0.0069,"M":0.0108,"mittel":3.638,"bewertungen":20683}],"top_naiv":[{"title":"Gate of Heavenly Peace, The (1995)","mittel":5.0,"anzahl":3},{"title":"Smashing Time (1967)","mittel":5.0,"anzahl":2},{"title":"Schlafes Bruder (Brother of Sleep) (1995)","mittel":5.0,"anzahl":1},{"title":"Follow the Bitch (1998)","mittel":5.0,"anzahl":1},{"title":"Ulysses (Ulisse) (1954)","mittel":5.0,"anzahl":1}],"top_bayes":[{"title":"Shawshank Redemption, The (1994)","mittel":4.55,"anzahl":2227,"bayes":4.51},{"title":"Godfather, The (1972)","mittel":4.52,"anzahl":2223,"bayes":4.48},{"title":"Schindler's List (1993)","mittel":4.51,"anzahl":2304,"bayes":4.47},{"title":"Usual Suspects, The (1995)","mittel":4.52,"anzahl":1783,"bayes":4.47},{"title":"Raiders of the Lost Ark (1981)","mittel":4.48,"anzahl":2514,"bayes":4.44},{"title":"Seven Samurai (The Magnificent Seven) (Shichinin no samurai) (1954)","mittel":4.56,"anzahl":628,"bayes":4.43},{"title":"Star Wars: Episode IV - A New Hope (1977)","mittel":4.45,"anzahl":2991,"bayes":4.43},{"title":"Wrong Trousers, The (1993)","mittel":4.51,"anzahl":882,"bayes":4.41},{"title":"Rear Window (1954)","mittel":4.48,"anzahl":1050,"bayes":4.4},{"title":"Close Shave, A (1995)","mittel":4.52,"anzahl":657,"bayes":4.4}],"ml1m":{"datensatz":"ml-1m","bewertungen_train":802553,"bewertungen_test":197656,"rmse":{"Zufall":{"RMSE":1.5148399144128417,"MAE":1.214610035596525,"Sekunden":0.8},"Baseline":{"RMSE":0.9220693130595133,"MAE":0.7258733518389461,"Sekunden":1.4},"Item-KNN":{"RMSE":0.8831240759328398,"MAE":0.6898451918095099,"Sekunden":39.5},"SVD":{"RMSE":0.8749412899706743,"MAE":0.686577471346659,"Sekunden":6.9}},"top10":{"Beliebtheit":{"Precision@10":0.07897918065815983,"Recall@10":0.04684371699677273,"Abdeckung":0.032178892827924736},"SVD":{"Precision@10":0.043233713901947614,"Recall@10":0.02622977866599475,"Abdeckung":0.17862012544314154},"EASE":{"Precision@10":0.08913700470114172,"Recall@10":0.08703888471400151,"Abdeckung":0.3253340605399509}},"svd_parameter":{"n_factors":100,"n_epochs":25,"lr_all":0.007,"reg_all":0.05,"random_state":42}}};
+const C = { c1:'#2b6cb0', c2:'#d9822b', c3:'#a23b5a', dim:'#c9ced6', grid:'#e9dfcf' };
+const de = (x, n=0) => x.toLocaleString('de-DE', {minimumFractionDigits:n, maximumFractionDigits:n});
+const pct = (x, n=0) => de(x*100, n) + ' %';
+const $ = id => document.getElementById(id);
+const NS = 'http://www.w3.org/2000/svg';
+function el(p, tag, a = {}, txt) { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); if (txt !== undefined) e.textContent = txt; p.appendChild(e); return e; }
+function svg(host, W, H) { host.innerHTML = ''; return el(host, 'svg', {viewBox:`0 0 ${W} ${H}`, role:'img'}); }
+const tip = $('tip');
+function hover(node, html) {
+  node.addEventListener('mousemove', e => { tip.innerHTML = html; tip.style.opacity = 1; tip.style.left = Math.min(e.clientX + 14, innerWidth - 270) + 'px'; tip.style.top = (e.clientY + 14) + 'px'; });
+  node.addEventListener('mouseleave', () => tip.style.opacity = 0);
+}
+function card(cls, title, sub, legend, id) { return `<div class="card chart ${cls}"><h3>${title}</h3><p class="sub">${sub}</p>${legend ? `<div class="legend">${legend}</div>` : ''}<div id="${id}"></div></div>`; }
+const leg = (c, t) => `<span><i style="background:${c}"></i>${t}</span>`;
+
+/* ---------- KPIs ---------- */
+$('kpis').innerHTML = [
+  ['1 Mio.', 'Bewertungen (MovieLens 1M)'], ['6 040', 'Personen (1M)'], ['3 706', 'Filme (1M)'],
+  ['4,5 %', 'der Nutzer-Film-Paare bekannt (1M)'], ['3,58', 'Ø Sterne']
+].map(([v, l]) => `<div class="card kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+
+/* ---------- Daten-Tabs ---------- */
+function vbars(host, items, opt = {}) {
+  const W = 560, H = 230, L = 36, B = 26, T = 18, max = opt.max || Math.max(...items.map(d => d.v)) * 1.15;
+  const s = svg(host, W, H), bw = (W - L) / items.length;
+  [0, .25, .5, .75, 1].forEach(f => { const y = H - B - (H - B - T) * f; el(s, 'line', {x1:L, x2:W, y1:y, y2:y, stroke:C.grid}); el(s, 'text', {x:L - 6, y:y + 4, 'text-anchor':'end'}, opt.fmt ? opt.fmt(max * f) : de(max * f)); });
+  items.forEach((d, i) => {
+    const h = (H - B - T) * d.v / max, x = L + i * bw + bw * .18, y = H - B - h;
+    const r = el(s, 'rect', {x, y, width:bw * .64, height:h, fill:d.c || C.c1, rx:2});
+    el(s, 'text', {x:x + bw * .32, y:y - 5, 'text-anchor':'middle', class:'val'}, d.lab);
+    el(s, 'text', {x:x + bw * .32, y:H - 8, 'text-anchor':'middle'}, d.x);
+    if (d.tip) hover(r, d.tip);
+  });
+}
+function hbars(host, items, opt = {}) {
+  const W = 560, rh = opt.rh || 24, L = opt.L || 150, H = items.length * rh + 24, max = opt.max || Math.max(...items.map(d => d.v));
+  const s = svg(host, W, H);
+  items.forEach((d, i) => {
+    const y = i * rh + 4, w = (W - L - 60) * d.v / max;
+    el(s, 'text', {x:L - 8, y:y + rh / 2 + 3, 'text-anchor':'end'}, d.x);
+    const r = el(s, 'rect', {x:L, y:y + 3, width:Math.max(w, 1), height:rh - 8, fill:d.c || C.c1, rx:2});
+    el(s, 'text', {x:L + w + 6, y:y + rh / 2 + 3, class:'val'}, d.lab);
+    if (d.tip) hover(r, d.tip);
+  });
+}
+const DPAGES = [
+  () => {
+    $('dpage').innerHTML = card('s6', 'Wie wird bewertet?', '58 % der Bewertungen haben 4 oder 5 Sterne – bewertet wird vor allem, was man ausgesucht hat und mag.', '', 'c1')
+      + card('s6', 'Was das für die Auswertung bedeutet', 'Weil die Bewertungen positiv verzerrt sind, gilt ein Film als „relevant“, wenn er 4 oder 5 Sterne bekommt. Fehlende Bewertungen heißen meist: nicht gesehen – nicht: schlecht.', '', 'c2');
+    const v = D.verteilung;
+    vbars($('c1'), Object.keys(v).map(k => ({x:k + ' ★', v:v[k] * 100, lab:pct(v[k]), c:+k >= 4 ? C.c1 : C.dim, tip:`<b>${k} Sterne</b><br>${pct(v[k], 1)} aller Bewertungen`})), {fmt:x => de(x) + ' %'});
+    $('c2').innerHTML = `<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px">
+      <div class="card kpi" style="flex:1"><div class="v">4,5 %</div><div class="l">aller Nutzer-Film-Paare haben eine Bewertung (1M)</div></div>
+      <div class="card kpi" style="flex:1"><div class="v">0,1 %</div><div class="l">im großen Datensatz (latest)</div></div></div>
+      <p class="sub" style="margin-top:12px">Ein Empfehlungssystem soll genau diese Lücken füllen: Welche der ungesehenen Filme würden der Person gefallen?</p>`;
+  },
+  () => {
+    $('dpage').innerHTML = card('s12', 'Wenige Filme bekommen die meiste Aufmerksamkeit', 'Filme nach Anzahl Bewertungen sortiert: Die 10 % beliebtesten Filme vereinen 44 % aller Bewertungen. Jeder achte Film hat weniger als 10 Bewertungen.', '', 'c1');
+    const W = 1100, H = 300, L = 46, B = 34, T = 14, s = svg($('c1'), W, H), lt = D.long_tail;
+    const x = p => L + (W - L - 10) * p, y = v => H - B - (H - B - T) * v;
+    [0, .25, .5, .75, 1].forEach(f => { el(s, 'line', {x1:L, x2:W - 10, y1:y(f), y2:y(f), stroke:C.grid}); el(s, 'text', {x:L - 6, y:y(f) + 4, 'text-anchor':'end'}, de(f * 100) + ' %'); el(s, 'text', {x:x(f), y:H - 12, 'text-anchor':'middle'}, de(f * 100) + ' %'); });
+    el(s, 'text', {x:(W + L) / 2, y:H, 'text-anchor':'middle'}, 'Anteil der Filme (nach Beliebtheit sortiert)');
+    el(s, 'line', {x1:L, y1:y(0), x2:x(1), y2:y(1), stroke:C.dim, 'stroke-dasharray':'4 4'});
+    el(s, 'polyline', {points:lt.map(([p, v]) => `${x(p)},${y(v)}`).join(' '), fill:'none', stroke:C.c1, 'stroke-width':3});
+    const p10 = lt.find(d => Math.abs(d[0] - 0.1) < 1e-6);
+    el(s, 'circle', {cx:x(.1), cy:y(p10[1]), r:5, fill:C.c2});
+    el(s, 'text', {x:x(.1) + 10, y:y(p10[1]) + 18, class:'val'}, `Top 10 % der Filme → ${pct(p10[1])} der Bewertungen`);
+    el(s, 'text', {x:x(.62), y:y(.5) + 16, fill:'#9aa5b1'}, 'gestrichelt: Gleichverteilung');
+    lt.forEach(([p, v]) => { const c = el(s, 'circle', {cx:x(p), cy:y(v), r:9, fill:'transparent'}); hover(c, `Die beliebtesten <b>${pct(p)}</b> der Filme<br>erhalten <b>${pct(v, 1)}</b> der Bewertungen`); });
+  },
+  () => {
+    $('dpage').innerHTML = card('s7', 'Personen nach Altersgruppe und Geschlecht', '72 % Männer, mehr als die Hälfte unter 35 Jahren.', leg(C.c3, 'Frauen') + leg(C.c1, 'Männer'), 'c1')
+      + card('s5', 'Warum das wichtig ist', 'Was das Modell als „beliebt“ lernt, spiegelt vor allem den Geschmack junger Männer. Personalisierte Modelle lernen aber aus dem Verhalten jeder einzelnen Person – die Demografie nutze ich deshalb nur zur Beschreibung, nicht als Merkmal.', '', 'c2');
+    const W = 560, rh = 30, H = D.alter.length * rh + 24, mid = 300, s = svg($('c1'), W, H), max = Math.max(...D.alter.map(d => Math.max(d.F, d.M)));
+    const sc = v => 210 * v / max;
+    D.alter.forEach((d, i) => {
+      const y = i * rh + 4;
+      el(s, 'text', {x:mid, y:y + rh / 2 + 3, 'text-anchor':'middle', class:'val'}, d.gruppe);
+      const f = el(s, 'rect', {x:mid - 40 - sc(d.F), y:y + 4, width:sc(d.F), height:rh - 10, fill:C.c3, rx:2});
+      const m = el(s, 'rect', {x:mid + 40, y:y + 4, width:sc(d.M), height:rh - 10, fill:C.c1, rx:2});
+      el(s, 'text', {x:mid - 46 - sc(d.F), y:y + rh / 2 + 3, 'text-anchor':'end'}, de(d.F));
+      el(s, 'text', {x:mid + 46 + sc(d.M), y:y + rh / 2 + 3}, de(d.M));
+      hover(f, `<b>${d.gruppe}</b><br>Frauen: ${de(d.F)}`); hover(m, `<b>${d.gruppe}</b><br>Männer: ${de(d.M)}`);
+    });
+    $('c2').innerHTML = '';
+  },
+  () => {
+    $('dpage').innerHTML = card('s7', 'Genre-Vorlieben: Frauen und Männer', 'Unterschied im Anteil an allen Bewertungen der Gruppe (Prozentpunkte). Rechts: mehr bei Frauen, links: mehr bei Männern.', leg(C.c3, 'mehr bei Frauen') + leg(C.c1, 'mehr bei Männern'), 'c1')
+      + card('s5', 'Ø Bewertung nach Genre', 'Film-Noir, Dokumentationen und Kriegsfilme werden am besten bewertet, Horror am schlechtesten.', '', 'c2');
+    const g = [...D.genres].sort((a, b) => (b.F - b.M) - (a.F - a.M));
+    const W = 560, rh = 21, H = g.length * rh + 10, mid = 330, s = svg($('c1'), W, H), max = Math.max(...g.map(d => Math.abs(d.F - d.M)));
+    g.forEach((d, i) => {
+      const diff = (d.F - d.M) * 100, w = 190 * Math.abs(d.F - d.M) / max, y = i * rh + 2;
+      el(s, 'text', {x:diff >= 0 ? mid - 6 : mid + 6, y:y + rh / 2 + 3, 'text-anchor':diff >= 0 ? 'end' : 'start'}, d.genre.replace("Children's", 'Kinder'));
+      const r = el(s, 'rect', {x:diff >= 0 ? mid : mid - w, y:y + 3, width:w, height:rh - 7, fill:diff >= 0 ? C.c3 : C.c1, rx:2});
+      hover(r, `<b>${d.genre}</b><br>Frauen: ${pct(d.F, 1)} · Männer: ${pct(d.M, 1)} ihrer Bewertungen`);
+    });
+    el(s, 'line', {x1:mid, x2:mid, y1:0, y2:H, stroke:'#2a2420'});
+    const m = [...D.genres].sort((a, b) => b.mittel - a.mittel);
+    hbars($('c2'), m.map(d => ({x:d.genre.replace("Children's", 'Kinder'), v:d.mittel - 3, lab:de(d.mittel, 2), c:d.mittel >= 3.7 ? C.c1 : C.dim, tip:`<b>${d.genre}</b><br>Ø ${de(d.mittel, 2)} Sterne · ${de(d.bewertungen)} Bewertungen`})), {L:110, rh:24, max:1.2});
+  }
+];
+let dSeite = 0;
+function zeigeDaten(i) { dSeite = i; document.querySelectorAll('#dtabs .tab').forEach(t => t.setAttribute('aria-selected', +t.dataset.t === i)); DPAGES[i](); }
+$('dtabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) zeigeDaten(+b.dataset.t); });
+
+/* ---------- Bestenlisten ---------- */
+const kurz = t => t.length > 46 ? t.slice(0, 45) + '…' : t;
+$('naiv').innerHTML = D.top_naiv.map(d => `<li>${kurz(d.title)} <span>· Ø ${de(d.mittel, 1)} aus ${d.anzahl} Bewertung${d.anzahl > 1 ? 'en' : ''}</span></li>`).join('');
+$('bayes').innerHTML = D.top_bayes.map(d => `<li>${kurz(d.title)} <span>· Ø ${de(d.mittel, 2)} aus ${de(d.anzahl)} Bewertungen</span></li>`).join('');
+
+/* ---------- Modelle ---------- */
+function zeigeModelle(key) {
+  const E = D[key];
+  $('mpage').innerHTML = card('s6', 'Vorhersagefehler (RMSE)', 'Wie viele Sterne liegt die Vorhersage im Mittel daneben? Kleiner ist besser.', '', 'm1')
+    + card('s6', 'Treffer in der Top-10-Liste (Precision@10)', 'Wie viele der 10 Vorschläge hat die Person im Testzeitraum gesehen und mit 4–5 Sternen bewertet? Größer ist besser.', '', 'm2')
+    + card('s12', 'Recall@10 und Katalogabdeckung', 'Recall: Anteil der später gemochten Filme, die in der Top-10 standen. Abdeckung: wie viele verschiedene Filme überhaupt empfohlen werden.', leg(C.c1, 'Recall@10') + leg(C.c2, 'Abdeckung'), 'm3');
+  const rm = Object.entries(E.rmse).filter(([k]) => k !== 'Zufall').sort((a, b) => a[1].RMSE - b[1].RMSE);
+  hbars($('m1'), rm.map(([k, v]) => ({x:k, v:v.RMSE, lab:de(v.RMSE, 3), c:k === 'SVD' ? C.c1 : C.dim, tip:`<b>${k}</b><br>RMSE ${de(v.RMSE, 3)} · MAE ${de(v.MAE, 3)}`})), {L:90, rh:34, max:1.1});
+  const order = ['Beliebtheit', 'SVD', 'EASE'], col = {Beliebtheit:C.dim, SVD:C.c1, EASE:C.c2};
+  vbars($('m2'), order.map(k => ({x:k, v:E.top10[k]['Precision@10'] * 100, lab:pct(E.top10[k]['Precision@10'], 1), c:col[k], tip:`<b>${k}</b><br>Precision@10: ${pct(E.top10[k]['Precision@10'], 1)}<br>Recall@10: ${pct(E.top10[k]['Recall@10'], 1)}`})), {fmt:x => de(x, Number.isInteger(x) ? 0 : 1) + ' %'});
+  const W = 1100, H = 150, L = 110, s = svg($('m3'), W, H), rh = 44;
+  order.forEach((k, i) => {
+    const y = i * rh + 4, rec = E.top10[k]['Recall@10'], ab = E.top10[k].Abdeckung, sc = (W - L - 80) / 2;
+    el(s, 'text', {x:L - 8, y:y + 22, 'text-anchor':'end', class:'val'}, k);
+    const wr = (W - L - 160) * rec / .1, wa = (W - L - 160) * ab / .4;
+    const a = el(s, 'rect', {x:L, y:y + 4, width:wr, height:16, fill:C.c1, rx:2});
+    el(s, 'text', {x:L + wr + 6, y:y + 16}, pct(rec, 1) + ' Recall');
+    const b = el(s, 'rect', {x:L, y:y + 22, width:wa, height:16, fill:C.c2, rx:2});
+    el(s, 'text', {x:L + wa + 6, y:y + 34}, pct(ab, 1) + ' der Filme');
+    hover(a, `<b>${k}</b><br>Recall@10: ${pct(rec, 1)}`); hover(b, `<b>${k}</b><br>Abdeckung: ${pct(ab, 1)} der Filme werden mindestens einmal empfohlen`);
+  });
+  const svdP = E.top10.SVD['Precision@10'], popP = E.top10.Beliebtheit['Precision@10'], easeP = E.top10.EASE['Precision@10'];
+  $('mcallout').innerHTML = `<b>SVD</b> hat den kleinsten Vorhersagefehler, trifft in der Top-10 aber nur ${pct(svdP, 1)} – weniger als die einfache Beliebtheitsliste (${pct(popP, 1)}). <b>EASE</b> trifft ${pct(easeP, 1)} und empfiehlt dabei viel mehr verschiedene Filme. Für Empfehlungen zählt die Top-10-Liste, nicht der RMSE.`;
+}
+
+/* ---------- Demo ---------- */
+let M = null, gewaehlt = [];
+const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+function empfehle() {
+  const recs = $('recs'), leer = $('leer');
+  $('chips').innerHTML = gewaehlt.map(j => `<span class="chip">${M.filme[j].t}<button aria-label="${M.filme[j].t} entfernen" data-j="${j}">×</button></span>`).join('');
+  if (!gewaehlt.length) { recs.innerHTML = ''; leer.style.display = ''; return; }
+  leer.style.display = 'none';
+  const score = new Map(), beitrag = new Map();
+  for (const j of gewaehlt) for (const [b, w] of M.nachbarn[j]) {
+    if (gewaehlt.includes(b)) continue;
+    score.set(b, (score.get(b) || 0) + w);
+    const best = beitrag.get(b); if (!best || w > best[1]) beitrag.set(b, [j, w]);
+  }
+  const top = [...score.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+  recs.innerHTML = top.length ? top.map(([b]) => { const f = M.filme[b], w = M.filme[beitrag.get(b)[0]];
+    return `<li><div><div class="t">${f.t}</div><div class="m">${f.j || ''} · ${f.g}</div></div><div class="w">weil Sie <b>${w.t}</b> mögen</div></li>`; }).join('') : '<li><div class="muted">Keine Empfehlung gefunden – bitte weitere Filme wählen.</div></li>';
+}
+function waehle(j) { if (!gewaehlt.includes(j) && gewaehlt.length < 10) gewaehlt.push(j); $('such').value = ''; $('sugg').style.display = 'none'; empfehle(); }
+$('chips').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { gewaehlt = gewaehlt.filter(j => j !== +b.dataset.j); empfehle(); } });
+let aktiv = -1;
+$('such').addEventListener('input', () => {
+  const q = norm($('such').value.trim()), ul = $('sugg'); aktiv = -1;
+  if (!M || q.length < 2) { ul.style.display = 'none'; return; }
+  const treffer = []; M.filme.forEach((f, j) => { if (norm(f.t).includes(q) && !gewaehlt.includes(j)) treffer.push(j); });
+  ul.innerHTML = treffer.slice(0, 8).map(j => `<li role="option" data-j="${j}">${M.filme[j].t} <small>(${M.filme[j].j || '–'})</small></li>`).join('') || '<li class="muted">Kein Treffer unter den 1 500 Filmen</li>';
+  ul.style.display = 'block';
+});
+$('such').addEventListener('keydown', e => {
+  const items = [...$('sugg').querySelectorAll('li[data-j]')]; if (!items.length) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); aktiv = (aktiv + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length; items.forEach((li, i) => li.classList.toggle('act', i === aktiv)); }
+  if (e.key === 'Enter') { e.preventDefault(); waehle(+items[Math.max(aktiv, 0)].dataset.j); }
+});
+$('sugg').addEventListener('click', e => { const li = e.target.closest('li[data-j]'); if (li) waehle(+li.dataset.j); });
+const BEISPIELE = [
+  ['Animation', ['Toy Story', 'Finding Nemo', 'Shrek', 'Up']],
+  ['Science-Fiction', ['The Matrix', 'Inception', 'Blade Runner', 'Interstellar']],
+  ['Klassiker', ['The Godfather', 'Casablanca', 'Pulp Fiction', 'Schindler']],
+  ['Romantik', ['The Notebook', 'Pride & Prejudice', 'Love Actually', 'Notting Hill']],
+];
+function finde(stich) { const q = norm(stich); let j = M.filme.findIndex(f => norm(f.t) === q); if (j < 0) j = M.filme.findIndex(f => norm(f.t).startsWith(q)); if (j < 0) j = M.filme.findIndex(f => norm(f.t).includes(q)); return j; }
+fetch('assets/data/movielens_demo.json').then(r => r.json()).then(d => {
+  M = d;
+  $('quick').innerHTML = 'Beispiele: ' + BEISPIELE.map(([n], i) => `<button data-i="${i}">${n}</button>`).join('');
+  $('quick').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; gewaehlt = BEISPIELE[+b.dataset.i][1].map(finde).filter(j => j >= 0); empfehle(); });
+}).catch(() => { $('leer').textContent = 'Die Demo-Daten konnten nicht geladen werden.'; });
+
+zeigeDaten(0);
+zeigeModelle('ml1m');
+</script>
+</body>
+</html>
