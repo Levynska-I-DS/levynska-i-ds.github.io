@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Filmempfehlungen mit MovieLens – Iryna Levynska</title>
-  <meta name="description" content="Data-Science-Projekt: Empfehlungssystem auf MovieLens – Datenanalyse, Modellvergleich (SVD, KNN, EASE) und interaktive Demo.">
+  <meta name="description" content="Teamprojekt 2024: Empfehlungssystem mit MovieLens – Datenanalyse, Modellvergleich (SVD, NMF, BaselineOnly), TMDB-Anreicherung und interaktive Demo des trainierten Modells.">
   <link rel="stylesheet" href="style.css">
-  <style>
+<style>
     :root { --c1:#2b6cb0; --c2:#d9822b; --c3:#a23b5a; --dim:#c9ced6; --card:#fffdf9; --frame:#f1e8da; }
     .lead { font-size:1.02rem; line-height:1.7; color:var(--color-text-muted); max-width:680px; margin:0 0 22px; }
     .actions { display:flex; flex-wrap:wrap; gap:14px; }
@@ -68,7 +68,6 @@
   </style>
 </head>
 <body>
-
 <header>
   <h1>Iryna Levynska</h1>
   <nav>
@@ -81,80 +80,71 @@
 
 <section>
   <a href="portfolio.html" class="back">← Alle Projekte</a>
-  <span class="eyebrow-label">Python · scikit-surprise · NumPy · Empfehlungssysteme</span>
-  <h2>Filmempfehlungen: Was macht ein gutes Empfehlungssystem aus?</h2>
-  <span class="badge">Lernprojekt · Teamprojekt StackFuel 2024, 2026 KI-gestützt weiterentwickelt</span>
-  <p class="lead">Streaming-Dienste schlagen Filme vor, die uns gefallen könnten. Dieses Lernprojekt untersucht mit den öffentlichen MovieLens-Daten, welche Verfahren dafür taugen – und zeigt, dass das Modell mit dem kleinsten Vorhersagefehler <strong>nicht</strong> die besten Empfehlungen liefert. Unten können Sie die Daten erkunden und das Modell selbst ausprobieren.</p>
+  <span class="eyebrow-label">Python · pandas · scikit-surprise · TMDB-API</span>
+  <h2>Filmempfehlungen mit MovieLens</h2>
+  <span class="badge">Teamprojekt der StackFuel-Weiterbildung · August 2024</span>
+  <p class="lead">Ziel war ein Empfehlungssystem nach dem Prinzip <strong>„Wer diesen Film mochte, mochte auch …“</strong> sowie persönliche Vorschläge für jede Person. Ich habe das Projekt aufgesetzt, die Daten ausgewählt und aufbereitet, die Datenanalyse durchgeführt, die Modelle trainiert und verglichen und die Daten über die TMDB-API angereichert. Unten sehen Sie die Ergebnisse meiner Notebooks und können mein trainiertes Modell ausprobieren.</p>
   <div class="actions">
-    <a href="https://github.com/Levynska-I-DS/movielens-empfehlungssystem" target="_blank" rel="noopener" class="button">Code und Notebooks auf GitHub</a>
-    <a href="#demo" class="button secondary">Zur Demo</a>
+    <a href="https://github.com/Levynska-I-DS/MovieLens_Movie_Recommendation_System" target="_blank" rel="noopener" class="button">Notebooks auf GitHub</a>
+    <a href="#demo" class="button secondary">Modell ausprobieren</a>
   </div>
 </section>
 
 <section class="wide">
-  <span class="eyebrow-label">Die Daten</span>
+  <span class="eyebrow-label">Datenanalyse (Notebook 1)</span>
   <div class="report">
     <div class="kpis" id="kpis"></div>
     <div class="bar"><div class="tabs" role="tablist" id="dtabs">
       <button class="tab" role="tab" data-t="0" aria-selected="true">Bewertungen</button>
-      <button class="tab" role="tab" data-t="1" aria-selected="false">Long Tail</button>
-      <button class="tab" role="tab" data-t="2" aria-selected="false">Wer bewertet?</button>
-      <button class="tab" role="tab" data-t="3" aria-selected="false">Genres</button>
+      <button class="tab" role="tab" data-t="1" aria-selected="false">Filme</button>
+      <button class="tab" role="tab" data-t="2" aria-selected="false">Nutzer</button>
+      <button class="tab" role="tab" data-t="3" aria-selected="false">Genres &amp; Jahre</button>
     </div></div>
     <div class="grid" id="dpage"></div>
   </div>
-  <p class="hint">Diagramme: MovieLens 1M (1 000 209 Bewertungen von 6 040 Personen, 2000–2003; enthält Alter, Geschlecht und Beruf). Fahren Sie über die Elemente für Details.</p>
+  <p class="hint">Datensatz MovieLens „latest“ (GroupLens, Stand Juli 2023). Die Auswertungen entsprechen meinem Notebook 1; für die Website wurden sie interaktiv dargestellt. Fahren Sie über die Elemente für Details.</p>
 </section>
 
 <section class="wide">
-  <span class="eyebrow-label">Bestenlisten richtig berechnen</span>
+  <span class="eyebrow-label">Beobachtung aus der Analyse</span>
   <div class="report"><div class="lists">
-    <div class="card"><h3>Top 5 nach einfachem Mittelwert</h3><p class="sub">Filme mit einer einzigen 5-Sterne-Bewertung landen ganz oben – Zufall, nicht Qualität.</p><ol id="naiv"></ol></div>
-    <div class="card"><h3>Top 10 nach Bayes-Mittelwert</h3><p class="sub">Wenige Bewertungen werden zum Gesamtmittel gezogen (Gewicht: 100 Bewertungen). Jetzt stehen bewährte Klassiker oben.</p><ol id="bayes"></ol></div>
+    <div class="card"><h3>Top 10 nach durchschnittlicher Bewertung</h3><p class="sub">So stand es in meinem Notebook: Ganz oben stehen Filme mit 5,0 Sternen – aber jeweils nur aus einer einzigen Bewertung.</p><ol id="naiv"></ol></div>
+    <div class="card"><h3>Was das bedeutet</h3><p class="sub">Mein Streudiagramm „Durchschnitt vs. Anzahl der Bewertungen“ (Tab <em>Filme</em>) zeigt den Grund: Bei wenigen Bewertungen schwankt der Durchschnitt zufällig zwischen 0,5 und 5. Erst ab einigen Dutzend Bewertungen ist er stabil.</p>
+      <p class="sub"><strong>Nächster Schritt:</strong> Bestenlisten erst ab einer Mindestanzahl an Bewertungen bilden oder einen gewichteten (Bayes-)Durchschnitt verwenden.</p></div>
   </div></div>
 </section>
 
 <section class="wide">
-  <span class="eyebrow-label">Modellvergleich</span>
-  <div class="report">
-    <div class="grid" id="mpage"></div>
-    <div class="callout" id="mcallout"></div>
-  </div>
-  <p class="hint">MovieLens 1M. Aufteilung pro Person zeitlich: die jüngsten 20 % der Bewertungen sind das Testset. „Relevant“ = im Testzeitraum mit 4–5 Sternen bewertet. Abdeckung = Anteil der Filme, die mindestens einer Person empfohlen werden.</p>
+  <span class="eyebrow-label">Modelle (Notebooks 2 und 4)</span>
+  <div class="report"><div class="grid">
+    <div class="card chart s7"><h3>Vergleich der Modelle (Testdaten, 20 %)</h3><p class="sub">RMSE = mittlere Abweichung der vorhergesagten von der tatsächlichen Bewertung in Sternen. Kleiner ist besser.</p><div id="m1"></div></div>
+    <div class="card s5"><h3>Anreicherung mit TMDB (Notebook 4)</h3><p class="sub">Für die ersten 2 000 Filme habe ich über die TMDB-API zusätzliche Bewertungen abgerufen, normalisiert und mit den MovieLens-Daten zusammengeführt. Das SVD-Modell auf den angereicherten Daten:</p>
+      <div class="kpis" style="margin:8px 0 0"><div class="card kpi"><div class="v">0,786</div><div class="l">RMSE (Test)</div></div><div class="card kpi"><div class="v">0,589</div><div class="l">MAE (Test)</div></div></div>
+      <p class="sub" style="margin-top:10px">Ergebnis: praktisch gleich wie ohne Anreicherung – die Zusatzdaten für 2 000 Filme reichten nicht für eine messbare Verbesserung.</p></div>
+  </div></div>
+  <p class="hint">Ausgewählt wurde das Modell mit dem kleinsten Fehler: <strong>SVD</strong> (Matrixfaktorisierung). Bibliothek: scikit-surprise.</p>
 </section>
 
 <section class="wide" id="demo">
-  <span class="eyebrow-label">Ausprobieren</span>
-  <div class="report">
-    <div class="grid">
-      <div class="card s5">
-        <h3>1. Filme wählen, die Ihnen gefallen</h3>
-        <p class="sub">Tippen Sie einen Titel (englische Originaltitel) oder starten Sie mit einem Beispiel. Drei bis fünf Filme genügen.</p>
-        <div class="demo-top"><input id="such" type="search" placeholder="z. B. Matrix, Amélie, Toy Story …" autocomplete="off" aria-label="Film suchen"></div>
-        <ul class="sugg" id="sugg" role="listbox"></ul>
-        <div class="chips" id="chips"></div>
-        <div class="quick" id="quick"></div>
-      </div>
-      <div class="card s7">
-        <h3>2. Empfehlungen des Modells</h3>
-        <p class="sub">EASE-Modell, trainiert auf 33,8 Mio. Bewertungen (1 500 meistbewertete Filme). Rechts steht, welcher Ihrer Filme am meisten zur Empfehlung beiträgt.</p>
-        <ol class="recs" id="recs"></ol>
-        <p class="muted" id="leer">Noch keine Filme gewählt.</p>
-      </div>
+  <span class="eyebrow-label">Mein Modell ausprobieren</span>
+  <div class="report"><div class="grid">
+    <div class="card s7">
+      <h3>„Wer diesen Film mochte, mochte auch …“</h3>
+      <p class="sub">Wählen Sie einen Film. Mein gespeichertes SVD-Modell beschreibt jeden Film durch 100 gelernte Geschmacksmerkmale; angezeigt werden die Filme mit dem ähnlichsten Profil.</p>
+      <div class="demo-top"><input id="such" type="search" placeholder="z. B. Toy Story, Matrix, Titanic …" autocomplete="off" aria-label="Film suchen"></div>
+      <ul class="sugg" id="sugg" role="listbox"></ul>
+      <div class="quick" id="quick"></div>
+      <div id="gewaehlt" class="muted" style="margin:12px 0 4px"></div>
+      <ol class="recs" id="recs"></ol>
     </div>
-  </div>
-  <p class="hint">Die Berechnung läuft direkt in Ihrem Browser – es werden keine Eingaben gespeichert oder übertragen.</p>
-</section>
-
-<section>
-  <span class="eyebrow-label">Erkenntnisse</span>
-  <ol class="insights">
-    <li><strong>Der kleinste Vorhersagefehler macht noch keine gute Empfehlung.</strong> SVD sagt Sternebewertungen am genauesten voraus, liefert aber die schwächste Top-10-Liste – sogar schwächer als „einfach die beliebtesten Filme“. Die Metrik muss zur Aufgabe passen.</li>
-    <li><strong>EASE ist der klare Gewinner für Empfehlungen.</strong> Es lernt, welche Filme gemeinsam geschaut werden, trifft am häufigsten und nutzt einen viel größeren Teil des Katalogs als die Beliebtheitsliste.</li>
-    <li><strong>Die Daten sind extrem ungleich verteilt.</strong> Die 10 % beliebtesten Filme erhalten 44 % aller Bewertungen, und 95,5 % aller Nutzer-Film-Kombinationen sind unbekannt.</li>
-    <li><strong>Ranglisten brauchen eine Mindestzahl an Bewertungen.</strong> Ohne Korrektur stehen Filme mit einer einzigen 5-Sterne-Bewertung an der Spitze.</li>
-    <li><strong>Die Nutzerschaft ist nicht repräsentativ</strong> (72 % Männer, mehrheitlich unter 35). Was als „beliebt“ gilt, spiegelt vor allem ihren Geschmack – ein Bias, den ein produktives System beobachten sollte.</li>
-  </ol>
+    <div class="card s5">
+      <h3>Persönliche Empfehlungen (Notebook 3)</h3>
+      <p class="sub">Ausgabe meines Notebooks für Nutzer 1: Das Modell sagt für alle ungesehenen Filme eine Bewertung voraus und empfiehlt die höchsten.</p>
+      <p class="sub" id="n1hat"></p>
+      <ol class="recs" id="n1"></ol>
+    </div>
+  </div></div>
+  <p class="hint" id="demohint">Die Berechnung läuft direkt in Ihrem Browser. Das gespeicherte Modell wurde auf MovieLens 1M trainiert (800 167 Bewertungen); gezeigt werden Filme mit mindestens 150 Bewertungen.</p>
 </section>
 
 <section>
@@ -162,20 +152,31 @@
     <div>
       <span class="eyebrow-label">Umsetzung</span>
       <dl class="facts">
-        <dt>Datenanalyse</dt><dd>pandas und matplotlib: Datenqualität, Verteilungen, Long Tail, Demografie, Bayes-Mittelwert.</dd>
-        <dt>Modelle</dt><dd>Baseline, Item-KNN und SVD (scikit-surprise), EASE (eigene Implementierung mit NumPy/SciPy), Beliebtheit als Vergleich. Hyperparameter per Kreuzvalidierung nur auf den Trainingsdaten.</dd>
-        <dt>Demo</dt><dd>EASE-Modell auf MovieLens latest (33,8 Mio. Bewertungen, 1 500 meistbewertete Filme), als kompakte JSON-Datei exportiert; die Empfehlung wird im Browser berechnet.</dd>
-        <dt>Bewertung</dt><dd>Zeitliche Aufteilung pro Person; RMSE/MAE für Vorhersagen, Precision@10, Recall@10 und Katalogabdeckung für Empfehlungen.</dd>
+        <dt>1 · Datenaufbereitung &amp; Analyse</dt><dd>Laden von Bewertungen, Filmen, Tags und Links; Prüfung auf fehlende Werte; Erscheinungsjahr aus dem Titel; Verteilungen, Genres, Nutzerverhalten.</dd>
+        <dt>2 · Modelltraining</dt><dd>SVD, NMF und BaselineOnly mit scikit-surprise, Aufteilung 80/20, Bewertung mit RMSE und MAE, Speichern der Modelle.</dd>
+        <dt>3 · Empfehlungen</dt><dd>Kollaborative Empfehlungen aus dem SVD-Modell, inhaltsbasierte Vorschläge nach Genres, neue Filme und eine hybride Liste.</dd>
+        <dt>4 · Datenanreicherung</dt><dd>Abruf zusätzlicher Bewertungen über die TMDB-API und erneutes Training.</dd>
       </dl>
     </div>
     <div>
-      <span class="eyebrow-label">Daten &amp; Hintergrund</span>
+      <span class="eyebrow-label">Team &amp; Rollen</span>
       <dl class="facts">
-        <dt>Quelle</dt><dd>MovieLens 1M und MovieLens latest (Stand 07/2023), GroupLens Research, University of Minnesota. Öffentlich, anonymisiert.</dd>
-        <dt>Entstehung</dt><dd>2024 Teamprojekt der StackFuel-Weiterbildung – mein Anteil: Projektaufbau, Datenauswahl, Datenanalyse, Modelltraining und TMDB-Anreicherung. Damals wurde das Modell nur nach RMSE ausgewählt. 2026 wurde das Lernprojekt KI-gestützt (Claude) überarbeitet – zeitliche Aufteilung, Bewertung der Top-10-Listen, EASE und die interaktive Demo; die Fragestellungen stammen aus meinem Teamprojekt. <a href="https://github.com/Levynska-I-DS/MovieLens_Movie_Recommendation_System" target="_blank" rel="noopener">Teamprojekt 2024 ansehen</a></dd>
+        <dt>Mein Anteil</dt><dd>Projektaufbau und Repository, Auswahl der Daten, Notebooks 1–4: Datenaufbereitung, Analyse, Modelltraining und -vergleich, Empfehlungsfunktionen, TMDB-Anreicherung.</dd>
+        <dt>Team</dt><dd>Zwei Kollegen aus der Weiterbildung: Abschlusspräsentation.</dd>
+        <dt>Diese Seite</dt><dd>Die interaktive Darstellung wurde KI-gestützt (Claude) erstellt. Zahlen, Diagramme und das Modell stammen aus meinen Notebooks.</dd>
       </dl>
     </div>
   </div>
+</section>
+
+<section>
+  <span class="eyebrow-label">Was ich als Nächstes verbessere</span>
+  <ol class="insights">
+    <li><strong>Bestenlisten mit Mindestanzahl</strong> an Bewertungen bzw. gewichtetem Durchschnitt.</li>
+    <li><strong>Einheitlicher Datensatz für alle Experimente.</strong> Mein Rechner kam beim großen Datensatz (33,8 Mio.) an seine Grenzen; einige Modelle liefen deshalb auf der kleineren Version MovieLens 1M, und die Ergebnisse sind nicht direkt vergleichbar.</li>
+    <li><strong>Empfehlungslisten direkt bewerten:</strong> nicht nur die Genauigkeit der Sterne (RMSE), sondern ob die vorgeschlagenen Filme später tatsächlich gesehen und gemocht werden.</li>
+    <li><strong>Inhaltsbasierte Empfehlung verfeinern:</strong> Filme nach Ähnlichkeit der Genres sortieren statt nur nach Übereinstimmung.</li>
+  </ol>
 </section>
 
 <footer>
@@ -185,7 +186,7 @@
 <div id="tip" role="tooltip"></div>
 
 <script>
-const D = {"verteilung":{"1":0.0562,"2":0.1075,"3":0.2611,"4":0.3489,"5":0.2263},"long_tail":[[0.0,0.0],[0.05,0.2828],[0.1,0.4438],[0.15,0.5615],[0.2,0.6516],[0.25,0.7229],[0.3,0.7809],[0.35,0.828],[0.4,0.8664],[0.45,0.898],[0.5,0.9237],[0.55,0.9439],[0.6,0.9598],[0.65,0.972],[0.7,0.9814],[0.75,0.9885],[0.8,0.9936],[0.85,0.9971],[0.9,0.9989],[0.95,0.9997],[1.0,1.0]],"alter":[{"gruppe":"unter 18","F":78,"M":144},{"gruppe":"18–24","F":298,"M":805},{"gruppe":"25–34","F":558,"M":1538},{"gruppe":"35–44","F":338,"M":855},{"gruppe":"45–49","F":189,"M":361},{"gruppe":"50–55","F":146,"M":350},{"gruppe":"56+","F":102,"M":278}],"genres":[{"genre":"Action","F":0.0902,"M":0.1327,"mittel":3.491,"bewertungen":257457},{"genre":"Adventure","F":0.054,"M":0.0668,"mittel":3.477,"bewertungen":133953},{"genre":"Animation","F":0.0242,"M":0.0195,"mittel":3.685,"bewertungen":43293},{"genre":"Children's","F":0.0421,"M":0.0319,"mittel":3.422,"bewertungen":72186},{"genre":"Comedy","F":0.1903,"M":0.1631,"mittel":3.522,"bewertungen":356580},{"genre":"Crime","F":0.0325,"M":0.0395,"mittel":3.709,"bewertungen":79541},{"genre":"Documentary","F":0.0038,"M":0.0037,"mittel":3.933,"bewertungen":7910},{"genre":"Drama","F":0.194,"M":0.1606,"mittel":3.766,"bewertungen":354529},{"genre":"Fantasy","F":0.0172,"M":0.0173,"mittel":3.447,"bewertungen":36301},{"genre":"Film-Noir","F":0.0083,"M":0.0088,"mittel":4.075,"bewertungen":18261},{"genre":"Horror","F":0.0289,"M":0.0387,"mittel":3.215,"bewertungen":76386},{"genre":"Musical","F":0.0267,"M":0.0176,"mittel":3.666,"bewertungen":41533},{"genre":"Mystery","F":0.0197,"M":0.0189,"mittel":3.668,"bewertungen":40178},{"genre":"Romance","F":0.0994,"M":0.0609,"mittel":3.607,"bewertungen":147523},{"genre":"Sci-Fi","F":0.0542,"M":0.0814,"mittel":3.467,"bewertungen":157294},{"genre":"Thriller","F":0.0797,"M":0.0936,"mittel":3.57,"bewertungen":189680},{"genre":"War","F":0.0279,"M":0.0341,"mittel":3.893,"bewertungen":68527},{"genre":"Western","F":0.0069,"M":0.0108,"mittel":3.638,"bewertungen":20683}],"top_naiv":[{"title":"Gate of Heavenly Peace, The (1995)","mittel":5.0,"anzahl":3},{"title":"Smashing Time (1967)","mittel":5.0,"anzahl":2},{"title":"Schlafes Bruder (Brother of Sleep) (1995)","mittel":5.0,"anzahl":1},{"title":"Follow the Bitch (1998)","mittel":5.0,"anzahl":1},{"title":"Ulysses (Ulisse) (1954)","mittel":5.0,"anzahl":1}],"top_bayes":[{"title":"Shawshank Redemption, The (1994)","mittel":4.55,"anzahl":2227,"bayes":4.51},{"title":"Godfather, The (1972)","mittel":4.52,"anzahl":2223,"bayes":4.48},{"title":"Schindler's List (1993)","mittel":4.51,"anzahl":2304,"bayes":4.47},{"title":"Usual Suspects, The (1995)","mittel":4.52,"anzahl":1783,"bayes":4.47},{"title":"Raiders of the Lost Ark (1981)","mittel":4.48,"anzahl":2514,"bayes":4.44},{"title":"Seven Samurai (The Magnificent Seven) (Shichinin no samurai) (1954)","mittel":4.56,"anzahl":628,"bayes":4.43},{"title":"Star Wars: Episode IV - A New Hope (1977)","mittel":4.45,"anzahl":2991,"bayes":4.43},{"title":"Wrong Trousers, The (1993)","mittel":4.51,"anzahl":882,"bayes":4.41},{"title":"Rear Window (1954)","mittel":4.48,"anzahl":1050,"bayes":4.4},{"title":"Close Shave, A (1995)","mittel":4.52,"anzahl":657,"bayes":4.4}],"ml1m":{"datensatz":"ml-1m","bewertungen_train":802553,"bewertungen_test":197656,"rmse":{"Zufall":{"RMSE":1.5148399144128417,"MAE":1.214610035596525,"Sekunden":0.8},"Baseline":{"RMSE":0.9220693130595133,"MAE":0.7258733518389461,"Sekunden":1.4},"Item-KNN":{"RMSE":0.8831240759328398,"MAE":0.6898451918095099,"Sekunden":39.5},"SVD":{"RMSE":0.8749412899706743,"MAE":0.686577471346659,"Sekunden":6.9}},"top10":{"Beliebtheit":{"Precision@10":0.07897918065815983,"Recall@10":0.04684371699677273,"Abdeckung":0.032178892827924736},"SVD":{"Precision@10":0.043233713901947614,"Recall@10":0.02622977866599475,"Abdeckung":0.17862012544314154},"EASE":{"Precision@10":0.08913700470114172,"Recall@10":0.08703888471400151,"Abdeckung":0.3253340605399509}},"svd_parameter":{"n_factors":100,"n_epochs":25,"lr_all":0.007,"reg_all":0.05,"random_state":42}}};
+const D = {"kpi":{"bewertungen":33832162,"filme":86537,"bewertete_filme":83239,"nutzer":330975,"tags":2328315,"mittel":3.54},"verteilung":[[0.5,566306],[1.0,1013645],[1.5,562409],[2.0,2146492],[2.5,1760733],[3.0,6400664],[3.5,4465001],[4.0,8835955],[4.5,3123055],[5.0,4957902]],"mittel_film":[[0.5,1262],[0.75,181],[1.0,1302],[1.25,546],[1.5,2101],[1.75,1593],[2.0,4771],[2.25,3853],[2.5,9072],[2.75,8125],[3.0,15144],[3.25,10606],[3.5,12680],[3.75,4807],[4.0,4220],[4.25,618],[4.5,1032],[4.75,1326]],"anzahl_film":[[1,1,17916],[2,4,21450],[5,9,11852],[10,19,8595],[20,49,7310],[50,99,3863],[100,199,2860],[200,499,3081],[500,999,1848],[1000,1999,1506],[2000,4999,1399],[5000,9999,719],[10000,49999,796],[50000,199999,44]],"mittel_nutzer":[[0.5,361],[0.75,130],[1.0,514],[1.25,389],[1.5,916],[1.75,1126],[2.0,2872],[2.25,3978],[2.5,8323],[2.75,14047],[3.0,30522],[3.25,45518],[3.5,62923],[3.75,57229],[4.0,48880],[4.25,25214],[4.5,14543],[4.75,13490]],"genres":[["Drama",33681],["Comedy",22830],["Thriller",11675],["Romance",10172],["Action",9563],["Documentary",9283],["Horror",8570],["(no genres listed)",7060],["Crime",6917],["Adventure",5349],["Sci-Fi",4850],["Animation",4579],["Children",4367],["Mystery",3972],["Fantasy",3821],["War",2301],["Western",1690],["Musical",1059],["Film-Noir",354],["IMAX",195]],"jahre":[[1900,53],[1901,45],[1902,20],[1903,32],[1904,17],[1905,19],[1906,28],[1907,33],[1908,27],[1909,24],[1910,19],[1911,19],[1912,38],[1913,46],[1914,60],[1915,41],[1916,48],[1917,34],[1918,31],[1919,46],[1920,46],[1921,56],[1922,56],[1923,40],[1924,53],[1925,65],[1926,80],[1927,80],[1928,102],[1929,155],[1930,172],[1931,229],[1932,268],[1933,269],[1934,256],[1935,285],[1936,308],[1937,290],[1938,254],[1939,258],[1940,262],[1941,275],[1942,302],[1943,257],[1944,253],[1945,249],[1946,253],[1947,280],[1948,300],[1949,328],[1950,337],[1951,328],[1952,348],[1953,363],[1954,356],[1955,376],[1956,360],[1957,391],[1958,378],[1959,363],[1960,327],[1961,358],[1962,352],[1963,389],[1964,447],[1965,437],[1966,482],[1967,461],[1968,542],[1969,534],[1970,585],[1971,623],[1972,649],[1973,601],[1974,623],[1975,536],[1976,598],[1977,580],[1978,566],[1979,589],[1980,567],[1981,549],[1982,561],[1983,559],[1984,558],[1985,616],[1986,658],[1987,726],[1988,746],[1989,781],[1990,687],[1991,685],[1992,702],[1993,709],[1994,777],[1995,855],[1996,861],[1997,944],[1998,947],[1999,985],[2000,1125],[2001,1155],[2002,1233],[2003,1235],[2004,1425],[2005,1554],[2006,1765],[2007,1864],[2008,1964],[2009,2066],[2010,2053],[2011,2188],[2012,2383],[2013,2609],[2014,2875],[2015,3045],[2016,3144],[2017,3232],[2018,3172],[2019,3058],[2020,2628],[2021,2297],[2022,1962],[2023,556]],"streu":[[2,3.25],[376,2.6],[2,2.0],[645,3.38],[1,3.0],[8,2.88],[271,3.58],[4,3.0],[12,3.46],[1,2.0],[7,3.21],[3,3.17],[23,3.13],[1,3.0],[2,2.75],[34,3.01],[2,4.25],[5,2.8],[13,3.35],[8,2.56],[1,3.0],[1,3.0],[1,1.5],[1,2.5],[4,3.88],[2,2.25],[11,3.0],[3,3.33],[1,3.0],[183,2.84],[1,2.0],[15,3.23],[12067,3.24],[6,3.75],[2,3.5],[3,1.0],[33,3.64],[7,1.36],[1,3.5],[2,3.75],[16,3.53],[4,3.5],[3,3.17],[8,3.75],[1,2.0],[11,3.14],[43,2.92],[1,4.0],[1,3.0],[10,2.7],[1,5.0],[1,3.0],[83,3.61],[1,2.5],[2,4.0],[59,3.4],[1,0.5],[2,2.5],[5,3.5],[1,1.0],[2,3.75],[2,3.0],[10,3.2],[1727,4.06],[7,2.36],[187,3.67],[1,4.0],[64,3.74],[2,3.0],[7,3.79],[409,3.03],[2,3.0],[12,3.29],[2,0.5],[5,3.1],[6,1.75],[2,1.5],[16,1.62],[3,2.67],[12,3.25],[4,2.5],[2,3.5],[1,2.5],[2,4.5],[8,3.69],[1,1.0],[5,1.9],[1,4.5],[9,4.06],[15,2.53],[24,3.29],[4,3.62],[23,3.76],[5,2.7],[24056,3.8],[6,2.83],[7,1.64],[2,3.25],[2,2.0],[6,3.5],[1,2.0],[3271,3.1],[2,1.5],[6,3.25],[9,3.22],[3,3.33],[1,2.5],[46,3.1],[1,0.5],[43,3.84],[702,3.17],[2,1.5],[2,2.75],[42,2.81],[2,4.5],[1,2.0],[11,3.36],[1777,3.16],[2,3.5],[5278,2.46],[41,3.33],[1,3.0],[1,3.5],[1,4.0],[7,2.64],[2,2.5],[1,3.0],[1,4.0],[5,3.5],[5,2.6],[15,3.7],[15,2.13],[3,3.17],[5,3.7],[271,3.17],[348,3.7],[18,3.47],[3,2.0],[1,4.0],[66,3.55],[31,3.44],[2,3.5],[78,3.67],[84,2.74],[859,3.07],[8,2.88],[6,1.92],[2,3.0],[5,3.6],[2,4.0],[2,4.75],[4,3.38],[1,3.5],[137,3.22],[111,3.47],[2,3.5],[3,1.83],[123,2.88],[1,1.5],[2,3.5],[2,3.0],[37,2.31],[4,3.5],[10,2.3],[1,3.0],[66,3.0],[7,2.57],[2,2.5],[19,3.26],[310,2.64],[4,3.88],[1,3.5],[3,2.67],[8,2.19],[6,3.0],[1,5.0],[178,3.68],[4,3.38],[6,2.08],[3,1.83],[550,3.98],[63,2.33],[2,3.0],[22,2.57],[1,0.5],[31,3.06],[6,3.92],[1,4.0],[39,2.5],[1824,2.77],[1,0.5],[115,3.28],[1,4.0],[1,4.5],[1,1.0],[1,3.0],[7,4.21],[2,3.75],[222,3.29],[2,3.25],[2,3.75],[1,3.5],[8,2.0],[2,3.25],[4,2.5],[1,3.0],[24,3.12],[27,3.22],[4,3.38],[3,2.67],[7,3.29],[19,3.63],[2,3.0],[7,1.79],[91,3.64],[1,2.5],[3,3.0],[13,3.69],[4,3.0],[4,3.12],[7,2.14],[2,1.75],[8,2.94],[1,0.5],[4,3.75],[2,4.5],[2,2.0],[13,3.42],[175,3.39],[18,3.22],[1,5.0],[28,3.41],[3,3.5],[16,3.84],[9,2.61],[9,3.22],[16,2.69],[1,3.5],[21,3.17],[102,3.26],[1,0.5],[8,3.0],[3,2.17],[55,2.9],[1,3.0],[7,3.36],[1,5.0],[2,4.0],[4,2.88],[16,2.53],[8,3.12],[3,2.5],[95,3.07],[3,3.33],[9214,3.77],[2,3.0],[2,2.0],[1,1.5],[1,4.0],[3,4.17],[222,2.89],[8,3.5],[32,3.66],[1,3.5],[15,3.77],[1761,3.3],[121,3.55],[51,3.14],[2,2.25],[5,3.3],[1,3.0],[2373,3.24],[3,3.83],[838,2.97],[1,2.5],[1,0.5],[9,3.5],[3,2.33],[8,2.44],[9,3.06],[16,2.22],[453,3.67],[5,2.5],[9743,3.29],[2,3.25],[30,3.0],[68,3.78],[1,3.5],[1,3.5],[3,2.67],[11,2.59],[5602,3.84],[13,3.65],[16,2.91],[103,3.58],[3,4.0],[25,2.76],[1,1.0],[2,2.5],[1,3.0],[1,4.0],[1,3.5],[8,2.94],[3,2.5],[864,2.8],[1,4.0],[10,2.0],[3,3.17],[8,2.25],[15,3.33],[11,3.91],[1,2.5],[43,3.29],[2,4.0],[197,3.75],[2,3.5],[1,2.0],[3,2.0],[3,3.0],[8,4.19],[1,2.0],[2,2.5],[3291,3.46],[1,3.0],[1433,3.14],[4,1.5],[191,3.68],[4,2.75],[3,3.67],[1,4.5],[1,3.0],[3,1.17],[186,2.62],[1,3.5],[12,3.04],[20,3.03],[2,2.5],[1,5.0],[1704,3.53],[9,3.28],[20,2.97],[1,3.5],[263,3.26],[2,2.75],[1,1.0],[2,4.0],[6,3.92],[1,1.5],[8,3.06],[1,4.0],[51,3.59],[6,3.67],[701,3.78],[2,4.0],[49,3.61],[1,3.0],[18,2.22],[11,3.23],[6,3.08],[1,3.5],[11,3.55],[3,3.0],[32,3.41],[18,3.06],[70,3.48],[3,2.5],[3,3.33],[5,1.9],[56,2.92],[1,3.5],[3,1.33],[489,2.86],[46,3.45],[1,3.0],[3,3.0],[1,5.0],[10,3.6],[26,3.29],[2,2.0],[3,2.17],[7,3.43],[1,5.0],[49,2.64],[3,2.5],[3,2.0],[97,2.89],[1,3.0],[1,3.0],[3,2.67],[3,3.83],[3,2.5],[37,3.53],[29,3.88],[2292,3.32],[104,2.89],[4,3.0],[97,3.23],[5,3.0],[1,2.5],[8,2.12],[19,3.29],[22,2.55],[35,2.81],[2,2.75],[2,3.5],[6,3.33],[10,1.75],[2,3.5],[8,3.5],[11,2.36],[1,2.5],[33,3.59],[3,4.83],[1,1.5],[8,3.12],[1,2.0],[386,3.24],[2,2.5],[83,3.07],[4,2.0],[15,3.43],[7,2.43],[3,1.83],[1,2.5],[5,0.7],[156,3.5],[227,3.64],[4,2.12],[6,4.17],[1,4.0],[456,3.05],[10,3.2],[7,3.86],[15,3.6],[6,2.92],[23,3.52],[20,3.67],[4,3.88],[3,4.17],[1,3.5],[434,3.55],[8,3.12],[10,2.55],[2,1.5],[18,3.53],[2,2.5],[3,3.67],[11,3.5],[1,3.0],[9,3.33],[7,2.86],[2,1.75],[4,2.25],[21,2.71],[62,3.15],[2,3.0],[1,2.5],[1,3.0],[8,3.19],[10,3.6],[9,3.11],[1320,3.32],[89,3.43],[219,3.85],[1,3.0],[2,1.75],[6,2.33],[1,4.0],[1,3.5],[1,1.0],[1966,3.51],[14,3.29],[15,2.53],[2,3.75],[3,3.5],[1,3.5],[3,2.17],[15,3.2],[4,1.75],[1,3.5],[20,3.42],[25,3.5],[19,3.03],[3,3.0],[213,3.46],[1,4.5],[1140,2.51],[1,3.0],[34,3.75],[1,1.5],[12,1.42],[1,3.0],[3,2.17],[1,4.0],[1,2.0],[60,3.28],[2658,3.81],[1,4.0],[3,3.0],[2,2.25],[2,1.5],[2,3.75],[1,4.0],[14,3.64],[2,3.5],[5,2.1],[7522,3.87],[1,1.5],[1,1.5],[3,2.33],[4,4.0],[4,3.12],[16,3.34],[4,2.12],[1,3.5],[2,3.75],[28,1.7],[10427,3.65],[2,2.0],[26,3.56],[7,2.64],[52,3.62],[19871,3.8],[8,2.88],[15736,3.75],[166,3.53],[81,3.55],[2,4.25],[2,3.25],[100,2.78],[5,3.2],[12,2.92],[1,2.5],[152,3.17],[4,3.62],[9,3.39],[1,3.0],[7377,4.05],[5,3.9],[7,2.86],[6,3.42],[97,3.82],[10747,3.43],[1,2.5],[3,3.67],[2,0.5],[308,3.74],[1,5.0],[1,2.0],[17367,3.22],[164,2.87],[33,3.17],[3793,2.99],[1,4.0],[8,3.75],[1030,3.65],[2,3.5],[88,3.29],[1,3.0],[2,2.25],[844,3.59],[6,3.67],[6,2.58],[20,2.95],[5,2.7],[42,3.46],[1,3.5],[1,2.5],[1,3.5],[5,2.7],[4,3.75],[1,4.0],[4,4.38],[22,2.5],[43,3.1],[5,3.4],[2,3.0],[11,3.09],[78,3.52],[13,3.62],[22,2.86],[2,2.75],[2,2.75],[12782,3.39],[532,3.22],[3,2.5],[530,3.55],[5,2.2],[1,2.5],[1,2.0],[4,2.25],[25,3.36],[67,3.32],[1,2.5],[40,2.66],[2,2.75],[5,3.5],[1,2.5],[1,2.5],[1,4.0],[4,2.75],[1,3.0],[16,3.25],[9,2.83],[112,3.47],[1533,3.17],[220,3.5],[8,3.12],[1,4.0],[3,3.33],[1,2.5],[3,3.33],[3,3.17],[19,3.18],[19,2.84],[22,3.55],[1572,4.09],[3,3.17],[85,3.62],[1,3.5],[66,3.45],[16,3.53],[2,2.5],[1,4.5],[90,3.96],[3,4.5],[7,3.0],[1,2.5],[3,3.0],[1,2.5],[1,5.0],[7,3.14],[105,2.14],[4,1.12],[62,3.09],[2756,4.11],[1410,3.24],[68,2.94],[249,3.29],[8,3.5],[2,1.5],[5,3.1],[29,3.29],[3,2.33],[1,1.5],[39,3.49],[9,2.67],[1,2.5],[8,3.25],[2,3.75],[1,3.0],[604,3.34],[3,3.67],[12,3.08],[5,4.0],[32,2.78],[4,2.75],[1215,2.82],[139,2.41],[1,3.0],[1,2.5],[75,3.91],[2206,3.38],[1,3.0],[2,3.0],[35,3.73],[15,2.4],[2,3.0],[46,3.2],[2,1.5],[3,3.67],[1,2.5],[38,3.03],[1,2.5],[518,3.71],[2,1.25],[3,3.5],[4,3.88],[10,2.25],[3,3.83],[2,2.5],[5,3.0],[3,2.17],[73,3.85],[1180,3.53],[116,3.08],[804,3.0],[15,3.8],[3,2.5],[5,3.5],[3,3.5],[8,2.56],[5,3.1],[2,3.25],[3,3.17],[2,3.0],[1,5.0],[30,2.57],[19,2.45],[19,2.71],[2,3.75],[2,2.0],[2622,3.66],[3,3.17],[1,3.5],[6,4.08],[19,3.58],[1,3.5],[28,3.14],[7,2.86],[147,2.97],[18,3.39],[2,2.5],[2,3.25],[2,1.5],[4,2.5],[20,3.17],[2,2.75],[1,4.5],[1,2.5],[7,2.5],[10,3.55],[1,3.0],[42,2.23],[1,3.5],[5,3.8],[1,3.0],[24,3.33],[657,3.58],[5,2.8],[8,2.81],[2,3.5],[1,1.5],[10,3.35],[18,2.39],[56,3.35],[3,3.67],[2,1.5],[8,0.88],[197,3.9],[39,3.85],[4,4.0],[916,2.35],[2,2.25],[3,3.0],[23,1.67],[4696,3.87],[2,3.0],[1,3.5],[702,3.39],[14,2.96],[2,3.0],[37,3.28],[48,3.4],[2,3.0],[107,3.6],[384,3.32],[1,2.0],[1,2.5],[3,1.33],[1,4.0],[1,3.5],[1,2.0],[1,3.5],[6,2.08],[4,3.25],[75,3.19],[39,3.17],[48979,3.98],[16,1.59],[455,3.85],[10035,3.63],[11,1.73],[6,3.25],[467,3.85],[2,3.25],[10271,3.42],[1,3.0],[10,2.8],[984,2.89],[18,3.22],[5,3.5],[5,3.2],[18,1.81],[4,2.75],[126,2.31],[1,3.0],[2,4.25],[155,2.33],[4,2.88],[1,2.0],[7,2.57],[96,3.53],[1,1.5],[13,3.46],[1,2.5],[18,3.86],[1,4.0],[469,3.81],[1,3.0],[428,3.59],[4,3.5],[6,3.0],[19,3.92],[1,3.0],[205,3.71],[116,2.48],[9,3.22],[18,3.44],[1,3.0],[7,2.71],[9,2.72],[1,1.0],[1,4.0],[2,0.5],[28197,3.07],[3,3.0],[1,1.5],[247,2.2],[1,4.0],[318,3.35],[105,3.67],[4,2.88],[8,3.5],[15,3.3],[4,3.5],[2,2.75],[5,3.0],[142,3.36],[7,3.14],[1,0.5],[997,3.26],[4,4.0],[2,2.25],[22,3.11],[1088,2.96],[263,3.43],[2,1.75],[155,2.97],[2,3.0],[2,3.75],[1,3.5],[1,3.0],[18,2.72],[54,3.45],[1,3.0],[9,3.22],[3,3.17],[2,2.0],[18,3.22],[75,2.69],[8,2.75],[27,3.5],[12,3.12],[15,3.57],[2338,3.38],[51,3.68],[6,3.42],[3,3.33],[16,3.22],[93,2.51],[6,2.17],[36127,3.7],[29,3.38],[5,3.2],[1,4.5],[1,5.0],[220,2.78],[1,2.0],[2,3.75],[72,3.24],[3,1.33],[55,3.26],[5,4.3],[4,1.88],[1,3.0],[21,3.1],[13,3.19],[3,3.33],[4,2.75],[14,2.36],[4,2.25],[245,3.55],[2,3.5],[1,1.5],[9,2.0],[8,3.0],[1285,3.8],[2,3.0],[12,2.96],[4,3.38],[4,3.88],[6766,3.32],[71,3.49],[98,3.06],[330,3.53],[5,2.3],[4,3.25],[18,1.97],[2,2.75],[30,2.62],[453,3.59],[3015,3.1],[2,2.75],[3,2.5],[693,1.79],[1,4.0],[2,1.5],[1,4.0],[1,3.0],[3,3.17],[2,3.5],[2,1.25],[664,3.63],[1,2.5],[807,3.9],[62,3.27],[1258,3.48],[388,3.03],[7,3.36],[16,3.31],[7,3.0],[2,3.25],[3982,2.57],[4,1.38],[3,4.0],[2,3.75],[575,2.43],[3,2.5],[14,3.71],[1,5.0],[24,3.65],[156,3.6],[24,2.12],[86,2.87],[23,3.17],[6,2.42],[33,1.91],[247,2.37],[5,1.9],[193,3.57],[8,2.75],[47,2.57],[2,2.5],[31,3.56],[5,2.8],[63,3.24],[5,2.3],[4,2.88],[185,3.8],[1,2.0],[1,0.5],[1,5.0],[6,2.42],[3,2.5],[4,3.0],[185,3.14],[4,3.25],[254,3.09],[5,3.8],[2,2.75],[4,3.12],[57,3.11],[2,3.0],[3,1.5],[2,3.75],[2,4.0],[4,3.0],[8682,3.29],[11,2.64],[16,3.38],[91,2.49],[5,3.2],[7,1.71],[35,2.97],[20,2.33],[7,1.71],[2,2.75],[1,4.0],[1,1.0],[2,3.0],[3,2.83],[1,3.5],[62,3.55],[1,3.5],[3,2.17],[2,2.75],[9,2.89],[6,3.25],[3872,3.45],[759,2.75],[2,3.25],[8,3.44],[1,3.0],[355,3.9],[2,3.75],[51,3.51],[12,2.21],[1,1.5],[3,2.83],[1,1.5],[1,2.5],[7,4.0],[1,4.5],[81,3.48],[1,4.5],[15,3.27],[5,3.2],[3144,2.95],[6,2.58],[5,1.8],[895,4.06],[4,2.75],[9,2.94],[3,1.33],[5,1.6],[7,3.21],[5,3.0],[1,2.5],[2,2.25],[20453,4.0],[4,3.62],[6,2.08],[5197,3.45],[1,2.5],[11,2.91],[3,2.67],[8,2.44],[6,3.08],[4,3.12],[2,4.25],[8,2.75],[8,2.94],[1,1.5],[74,3.57],[1,3.5],[7,3.93],[11,2.55],[35,3.26],[2,2.5],[106,3.57],[7,3.36],[5,2.8],[1,2.0],[19,2.97],[109,3.21],[2,3.0],[247,3.33],[2,4.0],[9,2.61],[1,1.0],[789,2.26],[11,2.95],[2,3.25],[1,2.0],[4,4.12],[190,3.36],[1,2.5],[13,3.0],[2,3.25],[13,2.08],[1,1.5],[6442,3.82],[66,3.32],[2,3.0],[1,2.0],[3,4.0],[4,3.0],[19,2.87],[2,2.25],[2102,2.52],[11950,3.89],[5,3.7],[2,4.0],[13,2.69],[289,3.37],[6,2.33],[30,3.1],[3,3.33],[2,3.75],[39737,3.48],[10,3.25],[70,3.68],[10,3.25],[2,2.5],[50,3.44],[1,2.5],[8,1.25],[3,1.83],[15,2.67],[23,3.26],[7,3.64],[6,3.67],[10,3.5],[1,1.5],[22,3.05],[7,3.57],[5,3.8],[3,3.0],[4,2.75],[417,3.74],[9,3.89],[4,1.62],[434,3.42],[2,4.0],[35,3.07],[54,3.03],[28,3.16],[21,3.48],[2,2.0],[9,3.0],[2,4.0],[1,3.0],[45,2.18],[1,5.0],[32,3.44],[4644,3.69],[1,4.0],[3,3.0],[5,2.1],[12,2.71],[32,3.73],[1,0.5],[42,3.48],[333,2.87],[1,5.0],[140,3.65],[4,2.88],[65,3.11],[6,3.08],[27,2.96],[1,4.0],[1,2.0],[4,2.25],[2,3.5],[11,3.0],[4,3.0],[3,3.5],[5056,3.32],[24,2.85],[8,3.19],[54,2.3],[3,3.33],[77,2.23],[1,3.5],[42,3.19],[63,3.19],[3,2.83],[12,2.58],[59,2.87],[1,2.5],[1,3.0],[26,3.23],[20,3.92],[25,2.16],[26,3.5],[1,2.0],[3,2.83],[4,3.62],[1,3.5],[4,3.5],[1362,3.22],[3,2.17],[2,3.0],[7,2.93],[3,2.0],[695,3.13],[12,3.21],[28,3.75],[1,3.0],[16,3.41],[2,3.25],[2,2.5],[1,2.5],[1,2.0],[6,3.58],[70,3.76],[2,3.0],[44,3.35],[14,3.21],[22,3.16],[1,3.5],[60,3.34],[208,3.65],[3,3.5],[673,2.86],[1,3.5],[4,1.5],[2,3.0],[1,3.0],[3,3.0],[10,2.75],[5324,3.26],[1,3.5],[43,3.36],[4,3.88],[70,1.78],[4,3.75],[2,3.0],[1174,2.14],[43,3.08],[1,3.0],[1,3.5],[1,3.0],[51,3.03],[1,2.5],[1,2.0],[2,3.25],[77,2.69],[1,2.5],[16,2.19],[21,3.29],[1,5.0],[1,2.5],[1,3.0],[2,3.5],[1,0.5],[29,2.9],[10,3.1],[68,3.31],[21,4.1],[3,4.33],[22,3.68],[2,3.25],[8,3.31],[2,3.75],[66,3.2],[11,2.32],[10,2.0],[1,3.5],[7,2.29],[72,2.28],[20,3.55],[2,3.25],[2,2.5],[1,3.0],[3605,3.43],[2,3.25],[23,2.93],[1,3.5],[10,3.5],[17,3.03],[6,3.17],[3181,3.22],[8,3.12],[4,1.75],[1,0.5],[34,3.34],[53,2.63],[4,2.5],[92,3.47],[2,3.75],[1,1.5],[1,2.5],[1,4.0],[2,3.0],[207,3.31],[17,2.88],[7,3.14],[3,3.83],[1,3.0],[20,3.08],[37,2.54],[2,2.25],[1,4.0],[7,2.86],[1,2.5],[5,2.1],[2,3.25],[30,3.0],[1,4.0],[3,3.83],[1,5.0],[2219,3.73],[2,3.5],[12,3.12],[372,3.29],[16,3.53],[264,2.75],[1,2.5],[4,4.12],[87,3.18],[1,3.5],[4,1.75],[10874,3.71],[32,2.86],[1,2.5],[4,1.88],[22,2.75],[7,2.36],[1,3.0],[265,3.85],[1457,2.81],[325,2.87],[5,3.0],[1,3.5],[1,2.5],[29,3.29],[28,3.27],[1,4.0],[4,3.0],[251,3.85],[886,2.52],[40,2.89],[3,3.67],[11,3.27],[11,2.73],[98,3.0],[5,2.8],[11,3.27],[13700,3.34],[1,2.5],[6,2.58],[3,3.5],[34,2.74],[8,2.62],[8,2.88],[2,4.5],[1,3.5],[7081,3.82],[2,1.75],[2,1.75],[257,2.86],[1,3.0],[2,3.25],[1201,4.03],[9,2.67],[1852,3.76],[6,1.42],[4,1.38],[2,1.75],[1,3.5],[36,2.44],[3,3.0],[11,3.73],[3,3.17],[1,0.5],[1,3.0],[3,2.17],[4,2.12],[548,3.85],[21,2.83],[31,3.32],[3495,3.62],[55,2.99],[1,4.0],[6,2.5],[4,2.75],[2,3.0],[6,2.25],[43,3.44],[2,3.75],[3,3.17],[1,3.5],[4,4.12],[10,2.75],[4,2.25],[29,3.9],[17,2.18],[4,2.12],[1,3.5],[1,3.0],[476,3.38],[3,2.33],[3,2.33],[5,1.8],[7,3.43],[2,1.25],[5,3.7],[626,3.57],[50,3.27],[3,4.5],[6,3.67],[2,2.5],[3,2.33],[37,2.28],[2,3.25],[2,3.25],[5,2.9],[5,2.7],[1027,3.53],[1,2.5],[1,4.5],[6,3.42],[2,3.0],[410,3.9],[3772,3.64],[2,3.5],[3,2.67],[23202,3.96],[2,2.75],[1,5.0],[2,4.75],[1486,3.58],[10758,3.12],[1103,3.71],[4,3.0],[9,3.5],[4,2.25],[34,3.12],[35,3.51],[8,3.0],[163,3.62],[6,3.0],[8,2.31],[1,2.5],[321,3.15],[3,3.0],[7,3.5],[2,0.75],[1,3.0],[7455,3.58],[156,3.43],[38,3.47],[3,1.83],[1,2.0],[40,3.03],[3,2.0],[7,3.07],[2,1.5],[17,3.76],[15,3.17],[217,1.77],[2,3.5],[2,4.75],[2,3.75],[2,4.25],[2,2.75],[6,1.58],[3,3.17],[1,5.0],[16,2.59],[3,4.0],[11,2.27],[2,3.75],[1,4.5],[56,3.54],[21,2.79],[55,3.5],[3,3.0],[2,3.5],[2,3.75],[8,3.5],[1,2.5],[29,1.88],[101,3.85],[3,3.17],[7,3.71],[7,3.64],[10,3.1],[2,0.5],[1,3.0],[2,1.75],[1,4.0],[201,3.51],[1,2.5],[2,3.0],[26,3.75],[3,3.0],[9,3.11],[7,3.57],[2,2.75],[3,3.5],[1,2.5],[2,1.0],[2,3.5],[4,3.5],[17,3.35],[5,2.6],[5,3.1],[1,4.5],[7,3.0],[2,2.75],[1166,3.36],[2,4.75],[2,3.0],[15871,3.91],[1,2.0],[1,3.0],[6,4.58],[2,3.0],[42,3.32],[15,3.37],[133,1.76],[2,3.75],[3,3.17],[1,4.0],[72,3.44],[7,2.79],[10,3.65],[3,3.33],[2313,3.1],[2,3.0],[1,3.0],[1,0.5],[3,2.83],[1,1.5],[18,2.47],[1,3.0],[14,3.64],[1,3.5],[1,1.0],[9,2.89],[2,2.5],[11,3.09],[1,3.5],[2,4.5],[35,3.16],[2,3.0],[10,3.3],[5,3.5],[1,3.0],[3534,4.0],[14,3.71],[1,0.5],[43,2.62],[2,4.0],[10,3.45],[2,3.75],[6,1.17],[2,3.0],[4,3.75],[1,1.0],[1,4.0],[26,3.37],[14,2.86],[2,4.0],[21,3.48],[27,3.07],[227,3.66],[8,3.56],[2,2.25],[1,2.5],[661,3.73],[12,1.46],[1,2.0],[3,3.17],[12,2.0],[14,3.18],[7,3.29],[13,2.92],[2,1.25],[1,3.5],[1,3.5],[1,3.5],[2,4.0],[1,1.0],[1159,2.92],[16,2.94],[40,3.6],[1,2.5],[3,3.0],[1,4.0],[3,3.67],[2,2.5],[2035,2.67],[1,4.5],[2,1.25],[9,2.89],[3,2.33],[40,2.67],[1,2.5],[4,4.0],[22,3.39],[1,3.0],[1,2.5],[74,3.57],[1,2.5],[1,3.0],[1,3.5],[363,3.13],[386,3.46],[1,4.0],[1,2.5],[1,3.5],[8,3.12],[6,1.92],[23,2.98],[1,2.5],[1,2.0],[1,3.0],[2,2.0],[12122,3.93],[7,2.57],[4,2.88],[1,1.5],[6,2.92],[71,3.49],[244,3.38],[3337,4.07],[95,3.26],[977,2.95],[1,2.5],[10,2.4],[10,2.75],[8,2.31],[369,2.94],[1,2.0],[19,3.71],[103,3.67],[1,1.0],[12,3.29],[2,3.75],[32,2.55],[2,2.0],[6,2.83],[25,3.6],[3,3.67],[2,1.75],[10,3.65],[1,3.5],[1,3.5],[1,0.5],[1,4.5],[3,2.67],[21,3.81],[250,2.98],[1,2.5],[1,2.5],[6,2.83],[291,3.64],[2,3.0],[211,3.35],[489,2.68],[3,3.5],[11,3.14],[21,2.98],[10,2.45],[9,2.83],[2,0.5],[9,3.61],[2,3.75],[2,3.75],[1,0.5],[3,3.17],[4961,2.84],[3681,3.05],[1,3.5],[245,3.27],[2,2.5],[3,2.0],[1,1.5],[1,2.0],[2,4.25],[2,3.25],[3,3.17],[1347,3.15],[1,3.0],[2,0.5],[24,3.5],[1,3.5],[11,2.73],[26,4.02],[5,2.9],[3554,3.08],[55,2.47],[1,3.0],[1,1.0],[2,2.25],[73,3.33],[63,2.98],[2,1.5],[3,3.17],[11,1.91],[1,2.0],[3,3.0],[9,3.17],[2430,2.84],[21,3.45],[14,3.57],[52,3.01],[2,3.0],[3,3.0],[2,0.5],[19,3.0],[10072,3.96],[2,3.25],[1,3.0],[109,3.67],[3,2.83],[2,2.25],[3,4.17],[165,3.13],[45,2.58],[28,2.2],[5,2.7],[39,3.65],[625,3.64],[5,2.7],[4,2.5],[4,2.62],[1080,3.29],[241,3.06],[3,4.67],[1,2.5],[5,2.9],[17,3.15],[5,4.0],[34,3.31],[4,3.75],[32,3.31],[1,3.5],[2,2.75],[1,2.0],[70,3.29],[1,2.5],[178,3.0],[1,3.0],[2,3.75],[5,2.5],[553,2.83],[2,3.75],[18,2.42],[8403,2.69],[2,1.75],[1,2.0],[2,2.25],[27,3.02],[69,3.76],[17,2.82],[1,2.0],[25,3.24],[33,3.47],[1,3.0],[261,3.29],[3,1.5],[6,2.17],[1,3.5],[1,3.5],[3,1.5],[8,3.5],[15,3.97],[8,2.44],[34,3.13],[323,3.73],[2,3.25],[1,3.0],[1386,2.12],[24,3.5],[2,2.5],[611,3.06],[66,2.97],[7,2.79],[7,2.71],[3,3.83],[1,0.5],[91,3.43],[2,3.75],[2,3.5],[1,2.5],[3,3.17],[1,4.0],[41,3.38],[3,3.17],[2,3.5],[923,2.76],[1,0.5],[1,4.0],[3,4.0],[7,3.29],[5,2.1],[11,3.14],[69,2.97],[31,3.79],[5,2.7],[13,3.31],[2,1.25],[2,2.0],[33,3.33],[8,3.88],[781,3.46],[1,3.0],[69,2.77],[4,4.25],[1283,2.86],[1,2.0],[1,2.0],[58,2.79],[24,3.69],[1,4.0],[443,3.12],[13,1.27],[15,2.13],[1,5.0],[5,3.8],[8727,3.07],[41,3.65],[3,2.67],[1,3.5],[2,3.25],[2,2.75],[2,3.5],[11,3.59],[988,3.33],[13133,3.29],[1,3.0],[1197,3.73],[3,1.5],[2,3.75],[23,1.98],[3,3.0],[41,3.27],[1384,3.76],[1,3.5],[823,1.87],[1,1.0],[1,3.0],[1,3.5],[1,3.0],[1,0.5],[4670,3.29],[1,2.0],[2,2.75],[1,4.5],[1,0.5],[24068,3.61],[8,3.44],[3,2.17],[2,2.5],[3,2.17],[24,3.1],[13,2.88],[2,2.25],[1,3.5],[4693,3.49],[268,3.1],[3,2.0],[7,3.0],[44,3.57],[20,3.58],[61,2.39],[8,3.19],[1,0.5],[13,2.19],[1,3.5],[73,3.42],[1,0.5],[2,2.75],[31,2.87],[2,3.0],[180,3.53],[220,3.35],[2,2.0],[299,3.02],[16,2.31],[2,2.25],[2,2.75],[6,3.25],[1,4.0],[28,2.32],[350,3.86],[267,3.49],[7,2.79],[77,3.17],[1,2.0],[24,2.81],[7,3.79],[1,4.5],[27,3.22],[1,3.0],[1,4.0],[5,3.5],[417,2.72],[21,3.12],[22,3.82],[3,3.33],[2,3.25],[20,3.55],[2,2.75],[2,2.75],[2,1.5],[5,2.8],[10,2.65],[24,3.42],[8,3.5],[8,2.81],[3,3.5],[91,3.07],[1,3.5],[12,2.79],[1,2.0],[2,3.0],[31,3.76],[12,2.12],[2,3.5],[164,3.42],[10,2.85],[6,2.58],[5,3.0],[4,3.12],[2,3.75],[8,3.62],[1125,3.35],[463,3.58],[1,2.0],[56,3.38],[1,1.0],[1,3.0],[3,2.5],[19,3.18],[2,3.25],[92,3.26],[3,3.0],[160,3.73],[31185,3.52],[1,0.5],[44,3.28],[9,2.44],[1,3.5],[22,2.95],[16,3.03],[1,4.0],[1,5.0],[3,3.67],[17,3.68],[2,4.0],[3,2.67],[5,3.4],[1,3.5],[3,1.83],[45,3.23],[1,2.0],[4,2.5],[5,3.9],[8,2.38],[8,2.94],[2,3.5],[125,3.47],[3,3.33],[1,4.0],[5741,3.13],[20,2.85],[10,2.85],[1,4.0],[33,3.56],[6,2.42],[11,3.0],[1,2.0],[8,3.06],[1,4.5],[1,2.0],[1,2.0],[6838,2.51],[33,3.73],[38,3.37],[1,1.5],[49,3.66],[4,2.0],[10,2.8],[2,3.75],[8,2.75],[120,3.57],[65,3.0],[2366,2.77],[5,2.4],[1,3.0],[1,2.0],[3,2.0],[1,3.0],[1,0.5],[1,3.5],[1,3.5],[2,3.75],[1,3.0],[4,3.25],[2,4.75],[1,2.0],[2,1.25],[2,3.75],[148,3.08],[3,2.0],[577,3.4],[5,3.7],[29,3.12],[1,2.5],[1247,3.74],[3,1.83],[59,3.04],[1,3.5],[4,2.75],[7,4.07],[4,1.62],[26,3.71],[1,1.5],[9,2.11],[15,2.63],[2,4.0],[3,3.0],[10,3.6],[3,2.17],[4,3.5],[2,3.25],[2,3.5],[50,3.28],[1,4.5],[8,3.25],[4,3.5],[7,3.0],[53,3.25],[1,3.5],[2,3.0],[3,2.17],[1,2.0],[1,1.0],[14224,3.62],[166,3.72],[2,3.25],[7,3.36],[8,2.88],[1,0.5],[3,3.17],[3,1.83],[46,2.62],[4,3.5],[4,2.12],[1,3.0],[3,3.0],[4,2.38],[2,3.25],[3,2.5],[3,3.5],[22,3.3],[1,4.0],[3,2.67],[1,5.0],[41,2.21],[14,3.46],[14,3.29],[15,2.8],[19,3.5],[2,3.5],[306,3.42],[6,3.5],[6,2.42],[17,3.65],[15,3.17],[7,3.0],[5,2.6],[1,1.5],[1,3.5],[24,3.42],[1,4.5],[1,3.0],[229,3.89],[212,3.59],[14,3.11],[17,3.15],[1,3.0],[6,3.25],[6,3.17],[3,3.0],[1345,3.53],[6,2.92],[4,1.62],[28,3.52],[237,3.3],[14,2.86],[1,1.5],[492,2.76],[45,3.57],[317,3.92],[1,2.5],[2,4.0],[4,4.38],[1,2.0],[1,4.5],[1,3.5],[131,3.57],[4,3.25],[1,3.0],[2,3.25],[94,2.09],[1,1.0],[1,4.0],[24,2.42],[3,2.5],[1,1.0],[1,4.0],[61,3.62],[1,3.0],[5,2.9],[1,3.5],[1,0.5],[1,3.0],[14,3.21],[20,3.58],[4,3.25],[6,3.0],[1,3.0],[5,3.1],[7,2.5],[13,3.27],[1,1.0],[1,5.0],[1,5.0],[4,3.12],[9,3.61],[22,3.2],[23,3.04],[8,3.56],[1,1.0],[6,2.67],[1,1.5],[6,3.25],[95,2.39],[1,0.5],[18,3.31],[1,4.0],[3,2.67],[1,1.0],[6,1.5],[120,2.59],[125,3.04],[3,3.17],[77,3.3],[119,3.57],[1,2.0],[8,2.12],[1,1.0],[2,3.25],[1,3.0],[4,1.25],[54,3.79],[4,2.38],[4,3.12],[1029,2.94],[3,3.67],[3,3.67],[4,3.62],[1,1.5],[223,3.48],[23,3.2],[11,3.14],[3,3.83],[4,2.0],[1,3.0],[10,3.7],[11,2.45],[3,3.17],[47472,3.94],[4,3.25],[3,3.67],[1,3.0],[1,3.0],[4,2.75],[10,3.1],[110,3.0],[2,3.5],[11,2.45],[11,2.82],[8741,3.68],[241,3.32],[3,3.33],[3,3.33],[1,0.5],[8,3.69],[86,3.85],[3,3.33],[2,2.75],[5491,3.96],[1,3.5],[3,2.83],[1,2.5],[3,3.67],[4,2.12],[11,3.05],[16,1.69],[1,4.5],[29,2.76],[2,1.75],[4,2.5],[4,4.0],[7,3.21],[214,2.56],[5,2.5],[540,3.86],[5,2.9],[3,2.0],[6,3.75],[5,3.3],[39,3.63],[1,2.0],[3,2.17],[2,4.5],[5,2.2],[1,4.5],[4,3.38],[6,3.08],[2,2.5],[9,3.44],[12,3.21],[4,3.0],[10,3.25],[1,1.0],[10,3.4],[133,2.47],[34,3.07],[2,1.25],[5,2.8],[2,3.75],[39,3.42],[1,1.0],[7,2.71],[3,2.17],[6,1.67],[3,2.0],[6,4.0],[2,3.0],[1,4.0],[1,4.0],[5,3.7],[15,3.67],[14,3.25],[3,3.0],[34,3.57],[19,3.11],[343,2.79],[1,5.0],[37,3.39],[7,2.21],[2,2.75],[1,3.0],[22,3.64],[4,3.25],[7,3.86],[23,3.2],[450,2.86],[11,3.32],[1,1.0],[4,3.38],[2,3.0],[5,3.2],[15,2.73],[1,3.0],[1,3.5],[31,2.81],[43,2.98],[8,3.25],[1,5.0],[2,2.75],[52,3.44],[1,3.5],[2,1.5],[1,1.0],[2,4.5],[9,3.06],[780,3.67],[4,2.88],[1,2.5],[2,3.5],[8347,3.2],[2,3.0],[1,2.0],[22,3.0],[1,2.0],[4,3.12],[1,1.5],[11,3.23],[1,3.0],[5546,3.56],[2,2.5],[3,3.83],[55,3.15],[1,2.0],[1,4.0],[22,3.14],[14,3.93],[1,4.0],[1,3.5],[1,3.0],[2,3.25],[16,3.66],[61,3.61],[2555,3.09],[1,2.5],[2,2.75],[1,3.5],[11,3.68],[2,3.0],[32,1.53],[2,2.75],[6,2.83],[6,3.08],[37,2.57],[14,2.29],[7,2.93],[5,3.4],[634,3.51],[158,2.99],[15,3.33],[1,3.0],[95,2.94],[14,2.57],[1,3.0],[2,3.75],[18,3.58],[206,2.9],[2,4.25],[3,2.83],[86,3.55],[1,2.5],[121,2.45],[10,3.65],[1,3.0],[1,2.0],[6,3.33],[3,4.17],[1,3.0],[16,2.81],[3,2.0],[1,3.5],[3,1.67],[4,2.62],[3,2.33],[1,5.0],[43,2.62],[5,2.8],[71,2.96],[2846,4.07],[1,5.0],[3,4.17],[46,3.05],[6,3.33],[2,3.25],[4,2.62],[44,3.24],[21,3.45],[4,3.12],[1,3.5],[144,3.57],[346,3.4],[2,1.5],[652,3.44],[3,1.33],[10,3.15],[1,5.0],[4,2.75],[390,3.03],[1,1.0],[2,3.0],[6,3.5],[46,3.64],[232,2.95],[1,3.0],[1,3.5],[2,2.5],[1,3.0],[3,3.0],[4,2.75],[8,2.62],[8,2.31],[14,3.25],[1,1.5],[4,3.62],[90,3.69],[1381,2.76],[1,4.0],[14,2.25],[23,2.85],[12,3.25],[12,3.08],[18,3.0],[3,3.17],[14,3.75],[8,3.06],[3,2.83],[3,2.83],[2,3.75],[20,3.5],[3,3.17],[6,2.67],[15,2.6],[1,5.0],[1,4.0],[1,2.5],[2,3.5],[46,3.18],[5,1.5],[1,4.0],[1,2.5],[1,1.0],[54,3.04],[3,3.33],[138,2.89],[1,2.5],[14,3.32],[4,3.0],[1,4.0],[2,3.0],[1,0.5],[55,3.07],[1,1.0],[6,2.67],[1,5.0],[2,2.75],[3,4.0],[2,3.25],[3,3.5],[61,2.47],[8,2.5],[1,4.5],[2,2.5],[11,3.77],[7,2.71],[1,3.0],[18,3.31],[1,2.0],[1,2.0],[2,2.25],[1,5.0],[9,3.11],[25,3.26],[2,3.75],[2,3.0],[60,2.61],[55,2.99],[75514,4.0],[8,3.12],[314,3.35],[1228,3.28],[1,1.5],[1,1.5],[2,2.5],[2,3.5],[746,3.32],[2,2.75],[59,3.14],[3,2.83],[4,4.0],[2,3.0],[8,3.38],[202,3.39],[1,2.0],[1297,3.88],[1,2.5],[7,3.43],[52,2.34],[2,4.0],[2,3.5],[4,3.75],[1,3.0],[1,3.0],[7,4.14],[3,2.83],[1,3.0],[1,3.0],[4,2.25],[1,3.0],[4,2.25],[2,4.25],[3,1.67],[7,3.14],[4,3.0],[11,3.73],[12,3.12],[8,3.88],[5,2.7],[240,3.15],[20,3.22],[23,3.2],[2,3.5],[2,2.75],[1,0.5],[4,2.38],[4,2.38],[71,3.44],[2,2.25],[28512,3.81],[2,3.25],[38,2.91],[64,2.85],[5,3.5],[85,2.05],[13,3.19],[11,3.36],[23,3.78],[8,2.94],[7,3.0],[1714,3.06],[1,2.0],[782,3.16],[2,2.5],[58,3.73],[1,4.0],[3,4.33],[1,4.0],[1,1.0],[785,2.67],[396,2.95],[1646,3.83],[119,3.56],[305,3.32],[9,2.61],[2,3.5],[52,2.61],[1,2.5],[111,3.76],[17,2.94],[5,3.4],[6,2.42],[9,2.33],[13,3.04],[1,3.0],[4,3.75],[1,1.0],[3257,3.25],[5,3.0],[2,2.5],[2,2.0],[2,3.75],[3,3.17],[3,2.83],[5,1.9],[1,1.0],[22,2.7],[1,2.5],[3,2.33],[7359,3.56],[3,3.67],[198,3.55],[8,3.19],[3,2.17],[172,3.68],[4,2.75],[2,3.25],[4,3.62],[74,3.84],[1,0.5],[3,3.67],[704,3.45],[101,2.64],[2,2.5],[4,2.5],[1,3.5],[1,2.5],[1,2.5],[4,2.0],[14,2.54],[2,2.5],[2,3.5],[3,2.67],[1,3.0],[9,3.33],[2,2.25],[1,3.5],[1,5.0],[1,2.0],[358,3.72],[19,2.11],[3,4.33],[129,3.85],[210,3.44],[1,3.0],[7,3.5],[3,4.17],[48,2.95],[20,2.38],[11,3.05],[1924,3.44],[141,3.47],[10,2.05],[2,3.0],[7,1.93],[26,3.4],[3,2.17],[303,3.19],[6,3.25],[57,3.32],[3,2.0],[2,3.5],[1,4.5],[68,3.47],[2,3.75],[14,3.0],[3,2.33],[70,3.29],[1,3.5],[1,4.0],[3,3.33],[17,2.26],[1,2.5],[10,3.55],[15,3.37],[1,3.0],[91,3.32],[1,5.0],[7,1.57],[643,3.17],[110,3.05],[2,2.25],[17,3.65],[6,2.08],[3,3.33],[2,2.25],[4,3.5],[1,4.5],[3,1.67],[34,3.19],[3,2.5],[3,2.5],[53,2.66],[15,2.4],[1,3.5],[389,2.94],[49,3.7],[1,2.0],[5,2.6],[794,3.85],[1,3.0],[5,3.3],[11,3.0],[25,2.48],[2,3.5],[2,3.0],[7,3.21],[13,3.42],[32,3.09],[20,2.8],[4,1.25],[2,3.5],[3,2.33],[15,3.0],[5,3.0],[2,1.75],[6,3.5],[23,1.91],[2,3.0],[2,3.0],[44,3.74],[2,3.25],[4,3.25],[4,3.25],[2,2.75],[8,3.0],[2,2.25],[3,3.83],[1,3.5],[1,3.0],[5,4.0],[2,3.25],[719,3.65],[17,3.21],[64,2.06],[1,3.0],[5,3.0],[2,3.25],[1,2.5],[218,2.4],[20,3.08],[2,3.25],[7,3.64],[2,3.75],[23,2.65],[3,3.83],[2,3.0],[3,3.5],[3,3.5],[63,3.29],[1982,3.47],[9,3.56],[2,3.25],[147,3.66],[14,2.68],[10,3.75],[1,2.5],[6,2.42],[86,3.48],[13,3.5],[3422,3.9],[2,2.25],[1,3.0],[8,3.25],[4,3.38],[170,3.59],[3,2.0],[3,2.83],[12,3.42],[2,3.0],[3,2.33],[2,2.25],[132,3.03],[10,2.3],[5,3.2],[921,2.95],[36,3.71],[17,2.62],[248,3.27],[1,4.0],[9,1.94],[2,2.0],[1,3.5],[1051,3.3],[15,3.23],[16,1.88],[7,3.21],[1,4.5],[2,3.25],[2,1.5],[1,2.5],[3,2.0],[77,3.53],[7,2.64],[161,3.07],[10,3.5],[26,1.98],[1,2.0],[1,1.0],[3,3.83],[233,2.97],[12,2.71],[1,3.0],[6,0.92],[8,2.81],[1,5.0],[4,3.25],[203,3.69],[40,3.78],[3,2.83],[1,2.5],[1,1.0],[3,2.17],[2,1.75],[4,3.5],[299,3.67],[28,3.66],[2,1.25],[1,0.5],[8,2.69],[1,4.0],[10,3.55],[1,3.0],[1,3.5],[4,3.38],[4,3.88],[17120,4.25],[14,3.07],[6,3.5],[5,3.7],[30,3.72],[1,1.5],[1,3.5],[4,3.38],[1,3.5],[1,2.0],[14,3.04],[60,3.65],[396,2.55],[157,3.64],[3,3.17],[1,2.0],[1,2.0],[241,2.83],[8,3.06],[1,3.0],[6,2.0],[12,2.67],[4,1.25],[7,3.14],[11,3.73],[136,3.45],[23,3.24],[3,2.67],[1,3.0],[18,2.83],[2,3.0],[311,2.61],[10,3.0],[2,3.25],[1239,3.46],[5862,3.38],[57,3.5],[2,3.5],[24,1.5],[26,2.98],[2,3.0],[38,2.89],[1,3.0],[1,2.5],[1,3.0],[9,3.56],[2,3.25],[17,2.97],[157,3.44],[6,3.58],[58,3.42],[56,2.82],[6,3.08],[4,2.38],[59,3.51],[132,3.67],[5,2.8],[1565,2.85],[2,3.5],[8,3.0],[2,4.0],[3,4.0],[20,1.85],[5,2.6],[3,2.17],[1955,3.81],[1,5.0],[2170,2.99],[455,3.57],[4,4.12],[22,3.5],[1,2.0],[7,2.14],[159,2.82],[6,2.75],[4,3.0],[7,3.93],[16,2.84],[1,4.0],[2,3.25],[5,3.2],[1,5.0],[36950,4.01],[40,2.84],[2,1.5],[14,3.18],[2,3.25],[15,3.33],[2,2.25],[7746,3.71],[1,5.0],[2,3.75],[8,3.0],[15,3.3],[1,3.5],[1,3.0],[126,3.48],[16944,3.85],[517,3.13],[3,3.17],[13,3.27],[3,3.33],[2,3.5],[1,0.5],[50,3.07],[2,4.0],[5,2.1],[10,3.15],[24,3.19],[2,2.75],[465,3.85],[7,3.14],[2,3.5],[2,4.0],[1,5.0],[17,3.29],[32,3.28],[132,1.77],[33,3.26],[2,3.0],[1,4.0],[1,2.0],[8,3.31],[5,3.2],[1,3.5],[2672,3.62],[913,3.1],[8,2.0],[62,2.25],[2357,3.51],[22,3.66],[5,3.3],[7320,3.45],[325,1.71],[5,3.6],[2,2.0],[956,3.85],[2,3.5],[46,3.47],[10,2.2],[1,3.0],[1662,3.65],[1,3.5],[4646,3.19],[2,3.75],[2,1.75],[14,1.71],[1,3.5],[2,2.75],[52,3.1],[28,3.5],[1,3.5],[18,3.28],[2,4.25],[1,3.0],[1,4.0],[1,4.0],[1,5.0],[12,3.21],[2,3.75],[1,0.5],[9,3.94],[111,3.13],[7,2.07],[1,2.0],[5,3.6],[33,3.53],[74,3.26],[3,2.83],[1,2.0],[2,3.5],[1,2.0],[257,3.37],[13,3.27],[3,3.83],[600,2.19],[2,2.5],[10,2.2],[330,2.31],[2,2.75],[19,1.18],[81,3.14],[1,3.0],[255,3.48],[2,2.25],[652,2.97],[7,3.0],[2,4.0],[1,3.5],[2,0.75],[29,3.59],[17,2.76],[3,4.33],[9,3.5],[1,5.0],[17,2.79],[3,3.5],[671,3.1],[2,1.0],[3,2.0],[5,3.6],[1,1.5],[2041,3.36],[255,2.62],[10,3.55],[1,3.0],[123,2.9],[3,3.17],[8,3.0],[2,2.0],[1,2.0],[8,2.25],[1,3.5],[3,3.0],[1,1.5],[14,2.86],[1,4.5],[14,3.64],[16,2.66],[5,3.3],[40,3.21],[7,2.71],[74,2.83],[110,3.64],[5,3.5],[73,2.89],[5,3.4],[61,3.68],[2,3.25],[25,2.92],[5,2.5],[18,2.36],[12,3.0],[116,2.86],[4,2.75],[4,3.12],[1,2.0],[86,2.24],[114,3.21],[2,2.75],[3,3.67],[45,3.7],[2,3.75],[2,3.75],[61,2.96],[7,3.5],[1,2.0],[3,1.83],[38,3.83],[4,3.38],[6,2.83],[12,3.92],[47,3.03],[24,3.58],[9,3.0],[2,1.75],[2,3.0],[1,2.5],[9,2.78],[2,1.75],[6,3.25],[1,2.5],[46,2.73],[103,3.26],[11,2.86],[31,3.03]],"top_naiv":[{"title":"Christmas in the Rockies (2021)","mittel":5.0,"anzahl":1},{"title":"A Royal Corgi Christmas (2022)","mittel":5.0,"anzahl":1},{"title":"Hidden (2020)","mittel":5.0,"anzahl":1},{"title":"İstanbul Beneath My Wings (1996)","mittel":5.0,"anzahl":1},{"title":"Two for the Win (2021)","mittel":5.0,"anzahl":1},{"title":"Destination: Pluto Beyond the Flyby (2016)","mittel":5.0,"anzahl":1},{"title":"Little Loopers (2015)","mittel":5.0,"anzahl":1},{"title":"2BPerfectlyHonest (2004)","mittel":5.0,"anzahl":1},{"title":"A Ballad of Love (1970)","mittel":5.0,"anzahl":1},{"title":"The Nagano Tapes (2018)","mittel":5.0,"anzahl":3}],"top_bayes":[{"title":"Shawshank Redemption, The (1994)","mittel":4.42,"anzahl":122296},{"title":"Godfather, The (1972)","mittel":4.33,"anzahl":75004},{"title":"Parasite (2019)","mittel":4.33,"anzahl":12399},{"title":"Usual Suspects, The (1995)","mittel":4.27,"anzahl":72893},{"title":"Godfather: Part II, The (1974)","mittel":4.27,"anzahl":47271},{"title":"12 Angry Men (1957)","mittel":4.27,"anzahl":22730},{"title":"Schindler's List (1993)","mittel":4.24,"anzahl":84232},{"title":"Fight Club (1999)","mittel":4.24,"anzahl":86207},{"title":"Planet Earth (2006)","mittel":4.45,"anzahl":3015},{"title":"Seven Samurai (Shichinin no samurai) (1954)","mittel":4.25,"anzahl":17120}],"nutzer1":[{"title":"Double Indemnity (1944)","pred":4.91},{"title":"The Thin Man (1934)","pred":4.84},{"title":"Schindler's List (1993)","pred":4.83},{"title":"Sanjuro (Tsubaki Sanjûrô) (1962)","pred":4.79},{"title":"42 Up (1998)","pred":4.75},{"title":"Rear Window (1954)","pred":4.75},{"title":"The Decline of Western Civilization (1981)","pred":4.74},{"title":"The Palm Beach Story (1942)","pred":4.73},{"title":"Singin' in the Rain (1952)","pred":4.71},{"title":"The Third Man (1949)","pred":4.7}],"nutzer1_gesehen":{"anzahl":62,"top":["Forrest Gump (1994)","Die Hard (1988)","Saving Private Ryan (1998)","The Sixth Sense (1999)","Indiana Jones and the Last Crusade (1989)","Disturbia (2007)","Gladiator (1992)","The Notebook (2004)"]}};
 const C = { c1:'#2b6cb0', c2:'#d9822b', c3:'#a23b5a', dim:'#c9ced6', grid:'#e9dfcf' };
 const de = (x, n=0) => x.toLocaleString('de-DE', {minimumFractionDigits:n, maximumFractionDigits:n});
 const pct = (x, n=0) => de(x*100, n) + ' %';
@@ -201,176 +202,130 @@ function hover(node, html) {
 function card(cls, title, sub, legend, id) { return `<div class="card chart ${cls}"><h3>${title}</h3><p class="sub">${sub}</p>${legend ? `<div class="legend">${legend}</div>` : ''}<div id="${id}"></div></div>`; }
 const leg = (c, t) => `<span><i style="background:${c}"></i>${t}</span>`;
 
+
+
 /* ---------- KPIs ---------- */
+const K = D.kpi;
 $('kpis').innerHTML = [
-  ['1 Mio.', 'Bewertungen (MovieLens 1M)'], ['6 040', 'Personen (1M)'], ['3 706', 'Filme (1M)'],
-  ['4,5 %', 'der Nutzer-Film-Paare bekannt (1M)'], ['3,58', 'Ø Sterne']
+  [de(K.bewertungen / 1e6, 1) + ' Mio.', 'Bewertungen'], [de(K.filme), 'Filme'], [de(K.nutzer), 'Nutzer'],
+  [de(K.tags / 1e6, 1) + ' Mio.', 'Tags'], [de(K.mittel, 2), 'Ø Sterne (0,5–5)']
 ].map(([v, l]) => `<div class="card kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
 
-/* ---------- Daten-Tabs ---------- */
+/* ---------- Diagramm-Bausteine ---------- */
 function vbars(host, items, opt = {}) {
-  const W = 560, H = 230, L = 36, B = 26, T = 18, max = opt.max || Math.max(...items.map(d => d.v)) * 1.15;
+  const W = opt.W || 560, H = opt.H || 230, L = 46, B = 26, T = 18, max = opt.max || Math.max(...items.map(d => d.v)) * 1.12;
   const s = svg(host, W, H), bw = (W - L) / items.length;
   [0, .25, .5, .75, 1].forEach(f => { const y = H - B - (H - B - T) * f; el(s, 'line', {x1:L, x2:W, y1:y, y2:y, stroke:C.grid}); el(s, 'text', {x:L - 6, y:y + 4, 'text-anchor':'end'}, opt.fmt ? opt.fmt(max * f) : de(max * f)); });
   items.forEach((d, i) => {
-    const h = (H - B - T) * d.v / max, x = L + i * bw + bw * .18, y = H - B - h;
-    const r = el(s, 'rect', {x, y, width:bw * .64, height:h, fill:d.c || C.c1, rx:2});
-    el(s, 'text', {x:x + bw * .32, y:y - 5, 'text-anchor':'middle', class:'val'}, d.lab);
-    el(s, 'text', {x:x + bw * .32, y:H - 8, 'text-anchor':'middle'}, d.x);
+    const h = (H - B - T) * d.v / max, x = L + i * bw + bw * (opt.gap ?? .15), y = H - B - h, w = bw * (1 - 2 * (opt.gap ?? .15));
+    const r = el(s, 'rect', {x, y, width:Math.max(w, 1), height:Math.max(h, 0), fill:d.c || C.c1, rx:1.5});
+    if (d.lab) el(s, 'text', {x:x + w / 2, y:y - 5, 'text-anchor':'middle', class:'val'}, d.lab);
+    if (d.x !== undefined && (!opt.every || i % opt.every === 0)) el(s, 'text', {x:x + w / 2, y:H - 8, 'text-anchor':'middle'}, d.x);
     if (d.tip) hover(r, d.tip);
   });
 }
 function hbars(host, items, opt = {}) {
-  const W = 560, rh = opt.rh || 24, L = opt.L || 150, H = items.length * rh + 24, max = opt.max || Math.max(...items.map(d => d.v));
+  const W = 560, rh = opt.rh || 22, L = opt.L || 150, H = items.length * rh + 10, max = opt.max || Math.max(...items.map(d => d.v));
   const s = svg(host, W, H);
   items.forEach((d, i) => {
-    const y = i * rh + 4, w = (W - L - 60) * d.v / max;
+    const y = i * rh + 2, w = (W - L - 70) * d.v / max;
     el(s, 'text', {x:L - 8, y:y + rh / 2 + 3, 'text-anchor':'end'}, d.x);
-    const r = el(s, 'rect', {x:L, y:y + 3, width:Math.max(w, 1), height:rh - 8, fill:d.c || C.c1, rx:2});
+    const r = el(s, 'rect', {x:L, y:y + 3, width:Math.max(w, 1), height:rh - 7, fill:d.c || C.c1, rx:2});
     el(s, 'text', {x:L + w + 6, y:y + rh / 2 + 3, class:'val'}, d.lab);
     if (d.tip) hover(r, d.tip);
   });
 }
+const mio = v => v >= 1e6 ? de(v / 1e6, 1) + ' Mio.' : v >= 1e3 ? de(v / 1e3, 0) + ' Tsd.' : de(v);
+
 const DPAGES = [
   () => {
-    $('dpage').innerHTML = card('s6', 'Wie wird bewertet?', '58 % der Bewertungen haben 4 oder 5 Sterne – bewertet wird vor allem, was man ausgesucht hat und mag.', '', 'c1')
-      + card('s6', 'Was das für die Auswertung bedeutet', 'Weil die Bewertungen positiv verzerrt sind, gilt ein Film als „relevant“, wenn er 4 oder 5 Sterne bekommt. Fehlende Bewertungen heißen meist: nicht gesehen – nicht: schlecht.', '', 'c2');
-    const v = D.verteilung;
-    vbars($('c1'), Object.keys(v).map(k => ({x:k + ' ★', v:v[k] * 100, lab:pct(v[k]), c:+k >= 4 ? C.c1 : C.dim, tip:`<b>${k} Sterne</b><br>${pct(v[k], 1)} aller Bewertungen`})), {fmt:x => de(x) + ' %'});
-    $('c2').innerHTML = `<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px">
-      <div class="card kpi" style="flex:1"><div class="v">4,5 %</div><div class="l">aller Nutzer-Film-Paare haben eine Bewertung (1M)</div></div>
-      <div class="card kpi" style="flex:1"><div class="v">0,1 %</div><div class="l">im großen Datensatz (latest)</div></div></div>
-      <p class="sub" style="margin-top:12px">Ein Empfehlungssystem soll genau diese Lücken füllen: Welche der ungesehenen Filme würden der Person gefallen?</p>`;
+    $('dpage').innerHTML = card('s7', 'Verteilung der Bewertungen', 'Halbe Sterne von 0,5 bis 5. Am häufigsten sind 4 Sterne; ganze Sterne werden deutlich öfter vergeben als halbe.', '', 'c1')
+      + card('s5', 'Fehlende Werte', 'Geprüft in allen vier Tabellen (Bewertungen, Filme, Tags, Links).', '', 'c2');
+    const tot = D.verteilung.reduce((a, d) => a + d[1], 0);
+    vbars($('c1'), D.verteilung.map(([k, v]) => ({x:de(k, k % 1 ? 1 : 0), v, lab:'', c:k % 1 ? C.dim : C.c1, tip:`<b>${de(k, 1)} Sterne</b><br>${mio(v)} Bewertungen (${pct(v / tot, 1)})`})), {fmt:mio});
+    $('c2').innerHTML = `<table style="width:100%;font-size:.85rem;border-collapse:collapse">
+      ${[['Bewertungen', '0'], ['Filme', '0'], ['Tags', '17 leere Tags'], ['Links', '126 Filme ohne TMDB-ID']].map(([a, b]) => `<tr><td style="padding:6px 0;border-bottom:1px solid #f1e8da">${a}</td><td style="text-align:right;border-bottom:1px solid #f1e8da"><b>${b}</b></td></tr>`).join('')}
+      </table><p class="sub" style="margin-top:10px">Der Datensatz ist sauber. Die fehlenden TMDB-IDs betreffen nur 0,1 % der Filme.</p>`;
   },
   () => {
-    $('dpage').innerHTML = card('s12', 'Wenige Filme bekommen die meiste Aufmerksamkeit', 'Filme nach Anzahl Bewertungen sortiert: Die 10 % beliebtesten Filme vereinen 44 % aller Bewertungen. Jeder achte Film hat weniger als 10 Bewertungen.', '', 'c1');
-    const W = 1100, H = 300, L = 46, B = 34, T = 14, s = svg($('c1'), W, H), lt = D.long_tail;
-    const x = p => L + (W - L - 10) * p, y = v => H - B - (H - B - T) * v;
-    [0, .25, .5, .75, 1].forEach(f => { el(s, 'line', {x1:L, x2:W - 10, y1:y(f), y2:y(f), stroke:C.grid}); el(s, 'text', {x:L - 6, y:y(f) + 4, 'text-anchor':'end'}, de(f * 100) + ' %'); el(s, 'text', {x:x(f), y:H - 12, 'text-anchor':'middle'}, de(f * 100) + ' %'); });
-    el(s, 'text', {x:(W + L) / 2, y:H, 'text-anchor':'middle'}, 'Anteil der Filme (nach Beliebtheit sortiert)');
-    el(s, 'line', {x1:L, y1:y(0), x2:x(1), y2:y(1), stroke:C.dim, 'stroke-dasharray':'4 4'});
-    el(s, 'polyline', {points:lt.map(([p, v]) => `${x(p)},${y(v)}`).join(' '), fill:'none', stroke:C.c1, 'stroke-width':3});
-    const p10 = lt.find(d => Math.abs(d[0] - 0.1) < 1e-6);
-    el(s, 'circle', {cx:x(.1), cy:y(p10[1]), r:5, fill:C.c2});
-    el(s, 'text', {x:x(.1) + 10, y:y(p10[1]) + 18, class:'val'}, `Top 10 % der Filme → ${pct(p10[1])} der Bewertungen`);
-    el(s, 'text', {x:x(.62), y:y(.5) + 16, fill:'#9aa5b1'}, 'gestrichelt: Gleichverteilung');
-    lt.forEach(([p, v]) => { const c = el(s, 'circle', {cx:x(p), cy:y(v), r:9, fill:'transparent'}); hover(c, `Die beliebtesten <b>${pct(p)}</b> der Filme<br>erhalten <b>${pct(v, 1)}</b> der Bewertungen`); });
+    $('dpage').innerHTML = card('s6', 'Durchschnittliche Bewertung je Film', 'Die meisten Filme liegen zwischen 3 und 4 Sternen. Die Spitzen bei 0,5 und 5,0 sind Filme mit nur einer Bewertung.', '', 'c1')
+      + card('s6', 'Wie viele Bewertungen hat ein Film?', 'Long Tail: Die meisten Filme haben nur wenige Bewertungen, einige wenige über 50 000.', '', 'c2')
+      + card('s12', 'Durchschnitt vs. Anzahl der Bewertungen', 'Stichprobe von 3 000 Filmen. Links (wenige Bewertungen) streut der Durchschnitt über die ganze Skala, rechts wird er stabil.', '', 'c3');
+    vbars($('c1'), D.mittel_film.map(([k, v]) => ({x:de(k, 1), v, c:C.c1, tip:`Ø ${de(k, 2)}–${de(k + .25, 2)}: <b>${de(v)}</b> Filme`})), {every:2, gap:.05});
+    vbars($('c2'), D.anzahl_film.map(([a, b, v]) => ({x:mio(a), v, c:C.c1, tip:`${de(a)}–${de(b)} Bewertungen: <b>${de(v)}</b> Filme`})), {gap:.08, every:2});
+    const W = 1100, H = 300, L = 46, B = 34, T = 10, s = svg($('c3'), W, H), lx = v => L + (W - L - 10) * Math.log10(v) / 5.2, y = v => H - B - (H - B - T) * (v - .5) / 4.5;
+    [1, 10, 100, 1000, 10000, 100000].forEach(v => { el(s, 'line', {x1:lx(v), x2:lx(v), y1:T, y2:H - B, stroke:C.grid}); el(s, 'text', {x:lx(v), y:H - 14, 'text-anchor':'middle'}, mio(v)); });
+    [1, 2, 3, 4, 5].forEach(v => { el(s, 'line', {x1:L, x2:W - 10, y1:y(v), y2:y(v), stroke:C.grid}); el(s, 'text', {x:L - 6, y:y(v) + 4, 'text-anchor':'end'}, v); });
+    el(s, 'text', {x:(W + L) / 2, y:H, 'text-anchor':'middle'}, 'Anzahl Bewertungen (logarithmisch)');
+    D.streu.forEach(([n, m]) => el(s, 'circle', {cx:lx(n) + (Math.random() - .5) * 4, cy:y(m), r:2.2, fill:C.c1, 'fill-opacity':.35}));
   },
   () => {
-    $('dpage').innerHTML = card('s7', 'Personen nach Altersgruppe und Geschlecht', '72 % Männer, mehr als die Hälfte unter 35 Jahren.', leg(C.c3, 'Frauen') + leg(C.c1, 'Männer'), 'c1')
-      + card('s5', 'Warum das wichtig ist', 'Was das Modell als „beliebt“ lernt, spiegelt vor allem den Geschmack junger Männer. Personalisierte Modelle lernen aber aus dem Verhalten jeder einzelnen Person – die Demografie nutze ich deshalb nur zur Beschreibung, nicht als Merkmal.', '', 'c2');
-    const W = 560, rh = 30, H = D.alter.length * rh + 24, mid = 300, s = svg($('c1'), W, H), max = Math.max(...D.alter.map(d => Math.max(d.F, d.M)));
-    const sc = v => 210 * v / max;
-    D.alter.forEach((d, i) => {
-      const y = i * rh + 4;
-      el(s, 'text', {x:mid, y:y + rh / 2 + 3, 'text-anchor':'middle', class:'val'}, d.gruppe);
-      const f = el(s, 'rect', {x:mid - 40 - sc(d.F), y:y + 4, width:sc(d.F), height:rh - 10, fill:C.c3, rx:2});
-      const m = el(s, 'rect', {x:mid + 40, y:y + 4, width:sc(d.M), height:rh - 10, fill:C.c1, rx:2});
-      el(s, 'text', {x:mid - 46 - sc(d.F), y:y + rh / 2 + 3, 'text-anchor':'end'}, de(d.F));
-      el(s, 'text', {x:mid + 46 + sc(d.M), y:y + rh / 2 + 3}, de(d.M));
-      hover(f, `<b>${d.gruppe}</b><br>Frauen: ${de(d.F)}`); hover(m, `<b>${d.gruppe}</b><br>Männer: ${de(d.M)}`);
-    });
-    $('c2').innerHTML = '';
+    $('dpage').innerHTML = card('s7', 'Durchschnittliche Bewertung je Nutzer', 'Die meisten Personen vergeben im Mittel 3,5 bis 4 Sterne. Manche bewerten streng, andere fast immer mit 5 – das muss ein Modell berücksichtigen.', '', 'c1')
+      + card('s5', 'Was das für das Modell heißt', 'Jede Person hat eine eigene „Strenge“, jeder Film eine eigene „Beliebtheit“. Die Modelle BaselineOnly und SVD lernen diese Effekte als eigene Parameter.', '', 'c2');
+    vbars($('c1'), D.mittel_nutzer.map(([k, v]) => ({x:de(k, 1), v, c:C.c1, tip:`Ø ${de(k, 2)}–${de(k + .25, 2)}: <b>${de(v)}</b> Nutzer`})), {every:2, gap:.05});
+    $('c2').innerHTML = `<div class="kpis" style="margin-top:6px"><div class="card kpi"><div class="v">${de(K.nutzer)}</div><div class="l">Nutzer</div></div><div class="card kpi"><div class="v">${de(K.bewertungen / K.nutzer, 0)}</div><div class="l">Bewertungen pro Nutzer (Ø)</div></div></div>`;
   },
   () => {
-    $('dpage').innerHTML = card('s7', 'Genre-Vorlieben: Frauen und Männer', 'Unterschied im Anteil an allen Bewertungen der Gruppe (Prozentpunkte). Rechts: mehr bei Frauen, links: mehr bei Männern.', leg(C.c3, 'mehr bei Frauen') + leg(C.c1, 'mehr bei Männern'), 'c1')
-      + card('s5', 'Ø Bewertung nach Genre', 'Film-Noir, Dokumentationen und Kriegsfilme werden am besten bewertet, Horror am schlechtesten.', '', 'c2');
-    const g = [...D.genres].sort((a, b) => (b.F - b.M) - (a.F - a.M));
-    const W = 560, rh = 21, H = g.length * rh + 10, mid = 330, s = svg($('c1'), W, H), max = Math.max(...g.map(d => Math.abs(d.F - d.M)));
-    g.forEach((d, i) => {
-      const diff = (d.F - d.M) * 100, w = 190 * Math.abs(d.F - d.M) / max, y = i * rh + 2;
-      el(s, 'text', {x:diff >= 0 ? mid - 6 : mid + 6, y:y + rh / 2 + 3, 'text-anchor':diff >= 0 ? 'end' : 'start'}, d.genre.replace("Children's", 'Kinder'));
-      const r = el(s, 'rect', {x:diff >= 0 ? mid : mid - w, y:y + 3, width:w, height:rh - 7, fill:diff >= 0 ? C.c3 : C.c1, rx:2});
-      hover(r, `<b>${d.genre}</b><br>Frauen: ${pct(d.F, 1)} · Männer: ${pct(d.M, 1)} ihrer Bewertungen`);
-    });
-    el(s, 'line', {x1:mid, x2:mid, y1:0, y2:H, stroke:'#2a2420'});
-    const m = [...D.genres].sort((a, b) => b.mittel - a.mittel);
-    hbars($('c2'), m.map(d => ({x:d.genre.replace("Children's", 'Kinder'), v:d.mittel - 3, lab:de(d.mittel, 2), c:d.mittel >= 3.7 ? C.c1 : C.dim, tip:`<b>${d.genre}</b><br>Ø ${de(d.mittel, 2)} Sterne · ${de(d.bewertungen)} Bewertungen`})), {L:110, rh:24, max:1.2});
+    $('dpage').innerHTML = card('s6', 'Anzahl der Filme nach Genre', 'Drama und Komödie dominieren das Angebot. Ein Film kann mehreren Genres angehören.', '', 'c1')
+      + card('s6', 'Anzahl der Filme nach Erscheinungsjahr', 'Das Jahr habe ich aus dem Filmtitel extrahiert. Die Zahl der Filme steigt bis etwa 2015 stark an.', '', 'c2');
+    const g = D.genres.filter(([k]) => k !== '(no genres listed)');
+    hbars($('c1'), g.map(([k, v]) => ({x:k, v, lab:de(v), c:C.c1})), {L:100, rh:20});
+    const J = D.jahre, W = 560, H = 300, L = 46, B = 26, T = 12, s = svg($('c2'), W, H), max = Math.max(...J.map(d => d[1])) * 1.1;
+    const x = j => L + (W - L - 8) * (j - 1900) / (J[J.length - 1][0] - 1900), y = v => H - B - (H - B - T) * v / max;
+    [0, .5, 1].forEach(f => { el(s, 'line', {x1:L, x2:W - 8, y1:y(max * f), y2:y(max * f), stroke:C.grid}); el(s, 'text', {x:L - 6, y:y(max * f) + 4, 'text-anchor':'end'}, de(max * f)); });
+    [1900, 1940, 1980, 2020].forEach(j => el(s, 'text', {x:x(j), y:H - 8, 'text-anchor':'middle'}, j));
+    el(s, 'polyline', {points:J.map(([j, v]) => `${x(j)},${y(v)}`).join(' '), fill:'none', stroke:C.c1, 'stroke-width':2.5});
+    J.forEach(([j, v]) => { const c = el(s, 'rect', {x:x(j) - 2, y:T, width:4, height:H - B - T, fill:'transparent'}); hover(c, `<b>${j}</b>: ${de(v)} Filme`); });
   }
 ];
-let dSeite = 0;
-function zeigeDaten(i) { dSeite = i; document.querySelectorAll('#dtabs .tab').forEach(t => t.setAttribute('aria-selected', +t.dataset.t === i)); DPAGES[i](); }
+function zeigeDaten(i) { document.querySelectorAll('#dtabs .tab').forEach(t => t.setAttribute('aria-selected', +t.dataset.t === i)); DPAGES[i](); }
 $('dtabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) zeigeDaten(+b.dataset.t); });
 
-/* ---------- Bestenlisten ---------- */
-const kurz = t => t.length > 46 ? t.slice(0, 45) + '…' : t;
-$('naiv').innerHTML = D.top_naiv.map(d => `<li>${kurz(d.title)} <span>· Ø ${de(d.mittel, 1)} aus ${d.anzahl} Bewertung${d.anzahl > 1 ? 'en' : ''}</span></li>`).join('');
-$('bayes').innerHTML = D.top_bayes.map(d => `<li>${kurz(d.title)} <span>· Ø ${de(d.mittel, 2)} aus ${de(d.anzahl)} Bewertungen</span></li>`).join('');
+/* ---------- Top 10 ---------- */
+$('naiv').innerHTML = D.top_naiv.map(d => `<li>${d.title} <span>· Ø ${de(d.mittel, 1)} aus ${d.anzahl} Bewertung${d.anzahl > 1 ? 'en' : ''}</span></li>`).join('');
 
 /* ---------- Modelle ---------- */
-function zeigeModelle(key) {
-  const E = D[key];
-  $('mpage').innerHTML = card('s6', 'Vorhersagefehler (RMSE)', 'Wie viele Sterne liegt die Vorhersage im Mittel daneben? Kleiner ist besser.', '', 'm1')
-    + card('s6', 'Treffer in der Top-10-Liste (Precision@10)', 'Wie viele der 10 Vorschläge hat die Person im Testzeitraum gesehen und mit 4–5 Sternen bewertet? Größer ist besser.', '', 'm2')
-    + card('s12', 'Recall@10 und Katalogabdeckung', 'Recall: Anteil der später gemochten Filme, die in der Top-10 standen. Abdeckung: wie viele verschiedene Filme überhaupt empfohlen werden.', leg(C.c1, 'Recall@10') + leg(C.c2, 'Abdeckung'), 'm3');
-  const rm = Object.entries(E.rmse).filter(([k]) => k !== 'Zufall').sort((a, b) => a[1].RMSE - b[1].RMSE);
-  hbars($('m1'), rm.map(([k, v]) => ({x:k, v:v.RMSE, lab:de(v.RMSE, 3), c:k === 'SVD' ? C.c1 : C.dim, tip:`<b>${k}</b><br>RMSE ${de(v.RMSE, 3)} · MAE ${de(v.MAE, 3)}`})), {L:90, rh:34, max:1.1});
-  const order = ['Beliebtheit', 'SVD', 'EASE'], col = {Beliebtheit:C.dim, SVD:C.c1, EASE:C.c2};
-  vbars($('m2'), order.map(k => ({x:k, v:E.top10[k]['Precision@10'] * 100, lab:pct(E.top10[k]['Precision@10'], 1), c:col[k], tip:`<b>${k}</b><br>Precision@10: ${pct(E.top10[k]['Precision@10'], 1)}<br>Recall@10: ${pct(E.top10[k]['Recall@10'], 1)}`})), {fmt:x => de(x, Number.isInteger(x) ? 0 : 1) + ' %'});
-  const W = 1100, H = 150, L = 110, s = svg($('m3'), W, H), rh = 44;
-  order.forEach((k, i) => {
-    const y = i * rh + 4, rec = E.top10[k]['Recall@10'], ab = E.top10[k].Abdeckung, sc = (W - L - 80) / 2;
-    el(s, 'text', {x:L - 8, y:y + 22, 'text-anchor':'end', class:'val'}, k);
-    const wr = (W - L - 160) * rec / .1, wa = (W - L - 160) * ab / .4;
-    const a = el(s, 'rect', {x:L, y:y + 4, width:wr, height:16, fill:C.c1, rx:2});
-    el(s, 'text', {x:L + wr + 6, y:y + 16}, pct(rec, 1) + ' Recall');
-    const b = el(s, 'rect', {x:L, y:y + 22, width:wa, height:16, fill:C.c2, rx:2});
-    el(s, 'text', {x:L + wa + 6, y:y + 34}, pct(ab, 1) + ' der Filme');
-    hover(a, `<b>${k}</b><br>Recall@10: ${pct(rec, 1)}`); hover(b, `<b>${k}</b><br>Abdeckung: ${pct(ab, 1)} der Filme werden mindestens einmal empfohlen`);
-  });
-  const svdP = E.top10.SVD['Precision@10'], popP = E.top10.Beliebtheit['Precision@10'], easeP = E.top10.EASE['Precision@10'];
-  $('mcallout').innerHTML = `<b>SVD</b> hat den kleinsten Vorhersagefehler, trifft in der Top-10 aber nur ${pct(svdP, 1)} – weniger als die einfache Beliebtheitsliste (${pct(popP, 1)}). <b>EASE</b> trifft ${pct(easeP, 1)} und empfiehlt dabei viel mehr verschiedene Filme. Für Empfehlungen zählt die Top-10-Liste, nicht der RMSE.`;
-}
+hbars($('m1'), [['SVD', .786, .589], ['BaselineOnly', .863, .657], ['NMF', .871, .663]].map(([k, r, m]) => ({x:k, v:r, lab:de(r, 3), c:k === 'SVD' ? C.c1 : C.dim, tip:`<b>${k}</b><br>RMSE ${de(r, 3)} · MAE ${de(m, 3)}`})), {L:100, rh:40, max:1});
 
-/* ---------- Demo ---------- */
-let M = null, gewaehlt = [];
+/* ---------- Nutzer 1 ---------- */
+$('n1hat').innerHTML = `Nutzer 1 hat ${D.nutzer1_gesehen.anzahl} Filme bewertet, am besten u. a.: <b>${D.nutzer1_gesehen.top.slice(0, 5).map(t => t.replace(/\s*\(\d{4}\)$/, '')).join(', ')}</b>.`;
+$('n1').innerHTML = D.nutzer1.map(d => `<li><div><div class="t">${d.title}</div></div><div class="w">vorhergesagt <b>${de(d.pred, 2)} ★</b></div></li>`).join('');
+
+/* ---------- Demo: ähnliche Filme ---------- */
+let M = null;
 const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-function empfehle() {
-  const recs = $('recs'), leer = $('leer');
-  $('chips').innerHTML = gewaehlt.map(j => `<span class="chip">${M.filme[j].t}<button aria-label="${M.filme[j].t} entfernen" data-j="${j}">×</button></span>`).join('');
-  if (!gewaehlt.length) { recs.innerHTML = ''; leer.style.display = ''; return; }
-  leer.style.display = 'none';
-  const score = new Map(), beitrag = new Map();
-  for (const j of gewaehlt) for (const [b, w] of M.nachbarn[j]) {
-    if (gewaehlt.includes(b)) continue;
-    score.set(b, (score.get(b) || 0) + w);
-    const best = beitrag.get(b); if (!best || w > best[1]) beitrag.set(b, [j, w]);
-  }
-  const top = [...score.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
-  recs.innerHTML = top.length ? top.map(([b]) => { const f = M.filme[b], w = M.filme[beitrag.get(b)[0]];
-    return `<li><div><div class="t">${f.t}</div><div class="m">${f.j || ''} · ${f.g}</div></div><div class="w">weil Sie <b>${w.t}</b> mögen</div></li>`; }).join('') : '<li><div class="muted">Keine Empfehlung gefunden – bitte weitere Filme wählen.</div></li>';
+function zeige(j) {
+  const f = M.filme[j];
+  $('gewaehlt').innerHTML = `Gewählt: <b>${f.t}</b> (${f.j || '–'}) · ${f.g}`;
+  $('recs').innerHTML = M.nachbarn[j].map(([b, s]) => { const g = M.filme[b];
+    return `<li><div><div class="t">${g.t}</div><div class="m">${g.j || ''} · ${g.g}</div></div><div class="w">Ähnlichkeit <b>${de(s * 100, 0)} %</b></div></li>`; }).join('');
+  $('such').value = ''; $('sugg').style.display = 'none';
 }
-function waehle(j) { if (!gewaehlt.includes(j) && gewaehlt.length < 10) gewaehlt.push(j); $('such').value = ''; $('sugg').style.display = 'none'; empfehle(); }
-$('chips').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { gewaehlt = gewaehlt.filter(j => j !== +b.dataset.j); empfehle(); } });
 let aktiv = -1;
 $('such').addEventListener('input', () => {
   const q = norm($('such').value.trim()), ul = $('sugg'); aktiv = -1;
   if (!M || q.length < 2) { ul.style.display = 'none'; return; }
-  const treffer = []; M.filme.forEach((f, j) => { if (norm(f.t).includes(q) && !gewaehlt.includes(j)) treffer.push(j); });
-  ul.innerHTML = treffer.slice(0, 8).map(j => `<li role="option" data-j="${j}">${M.filme[j].t} <small>(${M.filme[j].j || '–'})</small></li>`).join('') || '<li class="muted">Kein Treffer unter den 1 500 Filmen</li>';
+  const t = []; M.filme.forEach((f, j) => { if (norm(f.t).includes(q)) t.push(j); });
+  ul.innerHTML = t.slice(0, 8).map(j => `<li role="option" data-j="${j}">${M.filme[j].t} <small>(${M.filme[j].j || '–'})</small></li>`).join('') || '<li class="muted">Kein Treffer (Filme bis 2000 mit mind. 150 Bewertungen)</li>';
   ul.style.display = 'block';
 });
 $('such').addEventListener('keydown', e => {
   const items = [...$('sugg').querySelectorAll('li[data-j]')]; if (!items.length) return;
   if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); aktiv = (aktiv + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length; items.forEach((li, i) => li.classList.toggle('act', i === aktiv)); }
-  if (e.key === 'Enter') { e.preventDefault(); waehle(+items[Math.max(aktiv, 0)].dataset.j); }
+  if (e.key === 'Enter') { e.preventDefault(); zeige(+items[Math.max(aktiv, 0)].dataset.j); }
 });
-$('sugg').addEventListener('click', e => { const li = e.target.closest('li[data-j]'); if (li) waehle(+li.dataset.j); });
-const BEISPIELE = [
-  ['Animation', ['Toy Story', 'Finding Nemo', 'Shrek', 'Up']],
-  ['Science-Fiction', ['The Matrix', 'Inception', 'Blade Runner', 'Interstellar']],
-  ['Klassiker', ['The Godfather', 'Casablanca', 'Pulp Fiction', 'Schindler']],
-  ['Romantik', ['The Notebook', 'Pride & Prejudice', 'Love Actually', 'Notting Hill']],
-];
-function finde(stich) { const q = norm(stich); let j = M.filme.findIndex(f => norm(f.t) === q); if (j < 0) j = M.filme.findIndex(f => norm(f.t).startsWith(q)); if (j < 0) j = M.filme.findIndex(f => norm(f.t).includes(q)); return j; }
-fetch('assets/data/movielens_demo.json').then(r => r.json()).then(d => {
+$('sugg').addEventListener('click', e => { const li = e.target.closest('li[data-j]'); if (li) zeige(+li.dataset.j); });
+const BEISPIELE = ['Toy Story', 'The Matrix', 'The Godfather', 'Titanic', 'The Silence of the Lambs', 'Star Wars: Episode IV - A New Hope'];
+fetch('assets/data/movielens_2024_modell.json').then(r => r.json()).then(d => {
   M = d;
-  $('quick').innerHTML = 'Beispiele: ' + BEISPIELE.map(([n], i) => `<button data-i="${i}">${n}</button>`).join('');
-  $('quick').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; gewaehlt = BEISPIELE[+b.dataset.i][1].map(finde).filter(j => j >= 0); empfehle(); });
-}).catch(() => { $('leer').textContent = 'Die Demo-Daten konnten nicht geladen werden.'; });
+  const idx = BEISPIELE.map(b => M.filme.findIndex(f => f.t === b)).filter(j => j >= 0);
+  $('quick').innerHTML = 'Beispiele: ' + idx.map(j => `<button data-j="${j}">${M.filme[j].t.replace(': Episode IV - A New Hope', '')}</button>`).join('');
+  $('quick').addEventListener('click', e => { const b = e.target.closest('button'); if (b) zeige(+b.dataset.j); });
+  zeige(idx[0]);
+}).catch(() => { $('gewaehlt').textContent = 'Die Modelldaten konnten nicht geladen werden.'; });
 
 zeigeDaten(0);
-zeigeModelle('ml1m');
+
 </script>
 </body>
 </html>
