@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forschung in Kürze – Iryna Levynska</title>
+  <meta name="description" content="Meine Forschung 2008–2014: Versuchsplanung, Regressionsmodell und statistische Prüfung für die Feinbearbeitung von Metallteilen in der Wirbelschicht.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root { --c1:#2b6cb0; --c2:#d9822b; --card:#fffdf9; --frame:#f1e8da; }
+    .lead { font-size:1.02rem; line-height:1.7; color:var(--color-text-muted); max-width:680px; margin:0 0 22px; }
+    .wide { max-width:1200px; }
+    .report { background:var(--frame); border:1px solid var(--color-border); border-radius:10px; padding:14px; }
+    .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-bottom:12px; }
+    .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:12px; }
+    .s6 { grid-column:span 6; } .s12 { grid-column:span 12; }
+    .card { background:var(--card); border-radius:8px; padding:14px 16px; border:1px solid #eadfcd; min-width:0; }
+    .card h3 { font-family:var(--font-main); font-size:.92rem; font-weight:700; margin:0 0 2px; }
+    .card .sub { font-size:.8rem; color:var(--color-text-muted); margin:0 0 8px; line-height:1.5; }
+    .kpi .v { font-family:var(--font-display); font-size:1.9rem; font-weight:600; line-height:1.1; }
+    .kpi .l { font-size:.8rem; color:var(--color-text-muted); margin-top:4px; }
+    .chart svg { display:block; width:100%; height:auto; }
+    .chart text { font-family:var(--font-main); font-size:11px; fill:#6b5d4c; }
+    .legend { display:flex; flex-wrap:wrap; gap:4px 14px; font-size:.76rem; color:var(--color-text-muted); margin-top:6px; }
+    .legend i { display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:5px; }
+    table.t { width:100%; border-collapse:collapse; font-size:.86rem; }
+    table.t th, table.t td { text-align:left; padding:7px 8px; border-bottom:1px solid #eadfcd; }
+    table.t th { font-weight:700; color:var(--color-text-muted); font-size:.78rem; }
+    table.t td.n { text-align:right; font-variant-numeric:tabular-nums; }
+    .hint { font-size:.76rem; color:var(--color-text-muted); margin-top:10px; }
+    .insights { margin:0; padding:0; list-style:none; counter-reset:i; }
+    .insights li { position:relative; padding:0 0 18px 40px; line-height:1.65; }
+    .insights li::before { counter-increment:i; content:counter(i); position:absolute; left:0; top:0; width:26px; height:26px; border-radius:50%; background:var(--color-accent-soft); color:var(--color-accent); font-weight:700; font-size:.85rem; display:flex; align-items:center; justify-content:center; }
+    .facts { margin:0; font-size:.93rem; line-height:1.7; }
+    .facts dt { font-weight:700; margin-top:10px; } .facts dd { margin:0; color:var(--color-text-muted); }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
+    .back { display:inline-block; margin-bottom:18px; font-size:.85rem; font-weight:600; color:var(--color-accent); }
+    .badge { display:inline-block; font-size:.78rem; font-weight:600; background:var(--color-accent-soft); color:var(--color-accent); padding:4px 10px; border-radius:20px; margin:0 0 14px; }
+    #tip { position:fixed; pointer-events:none; background:#16283a; color:#fff; font-size:.78rem; padding:6px 9px; border-radius:6px; opacity:0; transition:opacity .1s; z-index:10; }
+    @media (max-width:860px) { .two-col { grid-template-columns:1fr; gap:24px; } .s6 { grid-column:span 12; } }
+    @media (max-width:480px) { .report { padding:10px; } .kpi .v { font-size:1.5rem; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Iryna Levynska</h1>
+  <nav>
+    <a href="index.html">Start</a>
+    <a href="portfolio.html">Projekte</a>
+    <a href="achievements.html">Zertifikate</a>
+    <a href="contact.html">Kontakt</a>
+  </nav>
+</header>
+
+<section>
+  <a href="index.html#weg" class="back">← Zurück zu „Mein Weg“</a>
+  <span class="eyebrow-label">Versuchsplanung · Regression · Statistische Tests</span>
+  <h2>Meine Forschung in Kürze</h2>
+  <span class="badge">Dissertationsprojekt · Ostukrainische Wolodymyr-Dahl-Universität · 2008–2014</span>
+  <p class="lead">Komplex geformte Metallteile – etwa für Flugzeuge oder Motoren – müssen nach dem Fräsen oder Gießen entgratet und geglättet werden. Ich habe untersucht, wie man das schneller und gleichmäßiger erreicht: Das Teil dreht sich in einer Kammer, in der Druckluft das Schleifkorn in einen schwebenden Zustand versetzt (<strong>Wirbelschicht</strong>). Meine Frage: <strong>Welche Einstellungen bringen das beste Ergebnis – und lässt sich das vorab berechnen?</strong></p>
+</section>
+
+<section class="wide">
+  <span class="eyebrow-label">Das Wichtigste in Zahlen</span>
+  <div class="report">
+    <div class="kpis">
+      <div class="card kpi"><div class="v">4</div><div class="l">Einflussgrößen gleichzeitig untersucht</div></div>
+      <div class="card kpi"><div class="v">27</div><div class="l">geplante Versuche, je 5 Messungen</div></div>
+      <div class="card kpi"><div class="v">R² ≈ 0,91</div><div class="l">Regressionsmodell vs. Messung</div></div>
+      <div class="card kpi"><div class="v">12×</div><div class="l">schneller als Vibrationsschleifen (gleiche Rauheit)</div></div>
+    </div>
+    <div class="grid">
+      <div class="card chart s6"><h3>Modell sagt den Materialabtrag voraus</h3><p class="sub">Jeder Punkt ist ein Versuch: gemessener und vom Regressionsmodell berechneter Abtrag (mg/cm²). Je näher an der Diagonale, desto besser.</p><div id="c1"></div></div>
+      <div class="card chart s6"><h3>Oberfläche wird schnell glatt</h3><p class="sub">Mittlere Rauheit Ra (µm) über die Bearbeitungszeit bei zwei Drehgeschwindigkeiten des Teils.</p><div id="c2"></div>
+        <div class="legend"><span><i style="background:var(--c1)"></i>22 m/s</span><span><i style="background:var(--c2)"></i>16 m/s</span></div></div>
+    </div>
+    <p class="hint">Werte aus meiner Dissertation (Tabellen der Kapitel 3 und 4). R² habe ich 2026 aus der Tabelle „Messung vs. Modell“ nachträglich berechnet. Fahren Sie über die Punkte für Details.</p>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow-label">So bin ich vorgegangen</span>
+  <ol class="insights">
+    <li><strong>Frage und Messgröße festlegen.</strong> Zielgröße war der Materialabtrag pro Fläche: Probe vor und nach der Bearbeitung wiegen, fünfmal wiederholen, Mittelwert bilden. Dazu Rauheit und Gleichmäßigkeit der Oberfläche.</li>
+    <li><strong>Versuche statistisch planen.</strong> Statt einen Faktor nach dem anderen zu verändern, habe ich einen <em>Box-Behnken-Versuchsplan</em> genutzt: vier Faktoren auf je drei Stufen in 27 Versuchen. Die Reihenfolge wurde zufällig festgelegt, damit äußere Einflüsse das Ergebnis nicht verzerren.</li>
+    <li><strong>Daten prüfen.</strong> Ausreißer mit dem t-Test (Student) erkannt, gleiche Streuung der Versuche mit dem Cochran-Test bestätigt (5 %-Niveau).</li>
+    <li><strong>Modell bauen und testen.</strong> Quadratisches Regressionsmodell, nicht signifikante Terme entfernt, Modellgüte mit dem F-Test (Fisher) bestätigt. Ergebnis: Der Abtrag hängt vor allem von der <strong>Korngröße</strong> und der <strong>Drehgeschwindigkeit</strong> ab.</li>
+    <li><strong>In die Praxis bringen.</strong> Eine neue Versuchsanlage entwickelt (zwei Patente), ein Programm zur Simulation der Wirbelschicht geschrieben und Empfehlungen für die Einstellungen abgeleitet. Die Ergebnisse wurden in der Industrie und in der Lehre an der Universität eingesetzt.</li>
+  </ol>
+</section>
+
+<section class="wide">
+  <span class="eyebrow-label">Untersuchte Einflussgrößen</span>
+  <div class="report"><div class="card">
+    <table class="t">
+      <thead><tr><th>Faktor</th><th>untere Stufe</th><th>Mitte</th><th>obere Stufe</th></tr></thead>
+      <tbody>
+        <tr><td>Umfangsgeschwindigkeit des Teils (m/s)</td><td class="n">10</td><td class="n">16</td><td class="n">22</td></tr>
+        <tr><td>Bearbeitungszeit (min)</td><td class="n">2</td><td class="n">4</td><td class="n">6</td></tr>
+        <tr><td>Korngröße des Schleifmittels (µm)</td><td class="n">350</td><td class="n">600</td><td class="n">850</td></tr>
+        <tr><td>Luftdruck (MPa)</td><td class="n">0,2</td><td class="n">0,3</td><td class="n">0,4</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+</section>
+
+<section>
+  <div class="two-col">
+    <div>
+      <span class="eyebrow-label">Ergebnisse</span>
+      <dl class="facts">
+        <dt>Rauheit</dt><dd>Nach 20 Minuten sinkt Ra von 4,18 auf 0,55 µm. Eine Rauheit, für die das Vibrationsschleifen 120 Minuten braucht, ist nach 10 Minuten erreicht.</dd>
+        <dt>Feineres Korn</dt><dd>Mit Korn 520–600 µm wurde Ra 0,64 µm erreicht, mit 800–1000 µm in derselben Zeit nur 1,06 µm.</dd>
+        <dt>Ölhaltevermögen</dt><dd>Die bearbeitete Oberfläche nimmt rund viermal mehr Öl auf als nach dem üblichen Schleifen – wichtig für geschmierte Bauteile.</dd>
+        <dt>Veröffentlicht</dt><dd>22 wissenschaftliche Arbeiten, davon 11 in Fachzeitschriften, 17 Konferenzbeiträge, 2 Patente (Ukraine).</dd>
+      </dl>
+    </div>
+    <div>
+      <span class="eyebrow-label">Was das mit Datenanalyse zu tun hat</span>
+      <dl class="facts">
+        <dt>Planen statt probieren</dt><dd>Mit wenigen, gut geplanten Versuchen mehrere Einflüsse gleichzeitig messen – das gleiche Prinzip wie bei A/B-Tests.</dd>
+        <dt>Daten kritisch prüfen</dt><dd>Ausreißer und Streuung prüfen, bevor man Schlüsse zieht.</dd>
+        <dt>Modelle ehrlich bewerten</dt><dd>Ein Regressionsmodell gilt erst, wenn ein Test zeigt, dass es zur Messung passt.</dd>
+        <dt>Werkzeuge damals</dt><dd>MathCAD, Maple, KOMPAS-3D, eigene Programme. Heute mache ich dasselbe mit Python, SQL und Power BI.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2026 Iryna Levynska · <a href="portfolio-datenschutz.html">Datenschutz</a>
+</footer>
+
+<div id="tip" role="tooltip"></div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const de=(v,d=2)=>v.toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
+const tip=document.getElementById('tip');
+function hover(node,html){node.addEventListener('mousemove',e=>{tip.innerHTML=html;tip.style.opacity=1;tip.style.left=(e.clientX+12)+'px';tip.style.top=(e.clientY+12)+'px';});node.addEventListener('mouseleave',()=>tip.style.opacity=0);}
+function axes(s,W,H,m,xmax,ymax,xt,yt,xl,yl){
+  const X=v=>m.l+v/xmax*(W-m.l-m.r), Y=v=>H-m.b-v/ymax*(H-m.t-m.b);
+  yt.forEach(v=>{el('line',{x1:m.l,x2:W-m.r,y1:Y(v),y2:Y(v),stroke:'#e9dfcf'},s);const t=el('text',{x:m.l-6,y:Y(v)+4,'text-anchor':'end'},s);t.textContent=de(v,v%1?1:0);});
+  xt.forEach(v=>{const t=el('text',{x:X(v),y:H-m.b+16,'text-anchor':'middle'},s);t.textContent=de(v,0);});
+  const a=el('text',{x:(m.l+W-m.r)/2,y:H-4,'text-anchor':'middle'},s);a.textContent=xl;
+  const b=el('text',{x:12,y:(m.t+H-m.b)/2,'text-anchor':'middle',transform:`rotate(-90 12 ${(m.t+H-m.b)/2})`},s);b.textContent=yl;
+  return [X,Y];
+}
+// Chart 1: gemessen vs. Modell
+const D=[[1,1.103,0.215],[2,3.171,2.327],[3,1.679,0.923],[4,4.738,4.026],[5,3.09,2.309],[6,5.642,5.493],[7,3.193,2.482],[8,6.167,6.087],[9,2.198,2.538],[10,1.333,1.449],[11,3.736,3.34],[12,4.015,4.127],[13,7.853,7.451],[14,1.191,1.862],[15,2.002,2.355],[16,4.501,4.546],[17,6.732,6.46],[18,2.159,2.538],[19,1.001,0.255],[20,3.956,3.679],[21,1.328,1.455],[22,2.649,3.246],[23,1.172,1.039],[24,2.271,2.323],[25,2.58,1.503],[26,3.517,2.626],[27,2.135,2.538]];
+(function(){const W=480,H=340,m={l:46,r:14,t:12,b:40};const s=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Gemessener gegen berechneten Materialabtrag'},document.getElementById('c1'));
+  const [X,Y]=axes(s,W,H,m,8,8,[0,2,4,6,8],[0,2,4,6,8],'gemessen (mg/cm²)','Modell (mg/cm²)');
+  el('line',{x1:X(0),y1:Y(0),x2:X(8),y2:Y(8),stroke:'#c9ced6','stroke-dasharray':'4 4'},s);
+  D.forEach(([n,e,p])=>{const c=el('circle',{cx:X(e),cy:Y(p),r:5,fill:'#2b6cb0','fill-opacity':.8,stroke:'#fff'},s);hover(c,`Versuch ${n}<br>gemessen ${de(e)} · Modell ${de(p)} mg/cm²`);});
+})();
+// Chart 2: Rauheit über Zeit
+const R={t:[0,5,10,15,20],a:[4.18,1.18,1.14,0.95,0.55],b:[4.44,1.44,1.22,1.06,0.76]};
+(function(){const W=480,H=340,m={l:46,r:14,t:12,b:40};const s=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Rauheit über Bearbeitungszeit'},document.getElementById('c2'));
+  const [X,Y]=axes(s,W,H,m,20,5,R.t,[0,1,2,3,4,5],'Bearbeitungszeit (min)','Rauheit Ra (µm)');
+  [['a','#2b6cb0','22 m/s'],['b','#d9822b','16 m/s']].forEach(([k,col,lab])=>{
+    el('polyline',{points:R.t.map((t,i)=>X(t)+','+Y(R[k][i])).join(' '),fill:'none',stroke:col,'stroke-width':2.5},s);
+    R.t.forEach((t,i)=>{const c=el('circle',{cx:X(t),cy:Y(R[k][i]),r:4.5,fill:col,stroke:'#fff'},s);hover(c,`${lab}, ${t} min<br>Ra ${de(R[k][i])} µm`);});
+  });
+})();
+</script>
+</body>
+</html>
