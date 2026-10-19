@@ -110,6 +110,9 @@ header nav a {
   text-transform: uppercase;
 }
 
+header h1 a.home-link { color: inherit; text-decoration: none; }
+header h1 a.home-link:hover { opacity: .85; }
+
 header nav a:hover {
   color: var(--color-on-ink);
 }
